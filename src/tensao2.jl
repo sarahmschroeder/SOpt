@@ -1,11 +1,11 @@
-function tensao_equivalente(U, malha)
+function tensao_equivalente(U::Vector{T}, malha) where T
 
     # Número de elementos na malha
     ne = malha.ne
 
     # Loop pelos elementos da malha, calculando as 
     # tensões ...
-    σ_eq = zeros(4*ne) #Float64[]
+    σ_eq = zeros(T,4*ne) #Float64[]
 
     # Loops por elemento/nó/pto
     cont = 1
@@ -13,7 +13,7 @@ function tensao_equivalente(U, malha)
        for no=1:2
            for pto=0:1
                σe =  Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U)    
-               σ_eq[cont] = σe
+               σ_eq[cont] = σe/1E6 
                cont += 1
             end
         end  
@@ -25,7 +25,7 @@ end
 
 
 
-function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U; verbose=false)
+function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::Vector{TF}; verbose=false) where TF
 
     # Testes de consistência
     no in [1;2]    || error("Tensao_elemento_no_ponto::nó deve ser 1 ou 2") 
@@ -101,7 +101,10 @@ function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U; verbose=false)
 
     # Podemos calcular a tensão equivalente de von-Mises neste
     # ponto
-    σe = sqrt( (σ_N+σ_M)^2 + 3*τ^2 )
+    #
+    # XUNXÂÂÂÂÂÂO PARA EVITAR DIVISÕES POR ZERO NAS DF
+    #
+    σe = sqrt( (σ_N+σ_M)^2 + 3*τ^2 + 1E-6^2)
 
     # Retorna  a tensão equivalente no ele, nó, pto
     return σe 
@@ -117,7 +120,7 @@ end
 #
 #
 
-function PIRATA_Forcas_elemento(ele,malha::Malha,U::Vector{Float64})
+function PIRATA_Forcas_elemento(ele,malha::LFrame.Malha,U::Vector{Float64})
     
     # Recupera dados da estrutura malha
     conect = malha.conect

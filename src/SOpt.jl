@@ -2,6 +2,7 @@ module SOpt
 
     # Carrega as dependencias
     using LFrame
+    using LinearSolve
     using Distributions
     using LinearAlgebra
     using Test
@@ -10,8 +11,8 @@ module SOpt
     using YAML
     using DelimitedFiles
     using LASS
-    using Plots
     using Enzyme
+    using ForwardDiff
 
 
     # Carrega os modulos

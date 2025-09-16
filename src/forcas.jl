@@ -5,7 +5,8 @@
 # x é um vetor com as variáveis aleatórias ( magnitude
 # das forças )
 #
-function aplica_loads!(malha, x::Vector)
+function aplica_loads!(malha::LFrame.Malha, x::AbstractVector)
+
 
     # Teste dimensao
     if size(malha.loads,1) != length(x)
@@ -21,7 +22,7 @@ end
 #
 # Gera todas as realizações de forças para usar no LASS
 #
-function gera_distribuicoesforcas(malha, forcas0, nr, σ2=0.4)
+function gera_distribuicoesforcas(malha::LFrame.Malha, forcas0, nr, σ2=0.4)
 
     # Número de forças 
     nload = size(malha.loads,1)

@@ -13,7 +13,7 @@ function main_otim(arquivo,nr=100_000)
     ne = malha.ne
 
     # Vetor de variáveis de projeto  
-    ρ0 = ones(ne)
+    ρ0 = 0.5*ones(ne)
 
     # Recupera as intensidades originais das forças, conforme informado no yaml
     forcas0 = malha.loads[:,3]
@@ -34,12 +34,44 @@ function main_otim(arquivo,nr=100_000)
     # Gera bins
     bins = Generate_bins(realizacoes, Nb)
 
-    # Podemos gerar o "driver" 
-    g(ρ) = Driver(ρ,bins, malha, "g")
+    #
+    #
+    # Driver para calcular a resposta para um dado ρ
+    #
+    #
+    
+    #
+    #
+    # Driver para calcular a resposta para um dado x
+    #
+    #
+    funcaox(x) =  Driver_f(ρ0, x, malha)
 
-    # Chama o driver
-    @show g(ρ0)
-   
-    @show g(rand(ne))
+    # Derivada em relação ao ρ (otimização) para um x fixo
+    function derivada(x,ρ0)
+
+        # Substitui o valor de x 
+        funcaoρ(ρ) =  Driver_f(ρ, x, malha)
+
+        # Calcula a derivada
+        ForwardDiff.gradient(funcaoρ,ρ0)
+
+    end
+
+    #for r in eachcol(realizacoes)
+    #    @show funcaox(r)
+    #end
+
+
+    # Dada a distribuição das variáveis de projeto, calcula a resposta da 
+    # tensão equivalente com o LASS
+    Eσe, Varσe = Lass(bins,  x -> funcaox(x))  
+
+
+    # Calcula a derivada 
+    dEσe, dVarσe = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ0), malha.ne)  
+
+    @show Eσe, Varσe, dEσe, dVarσe
+
 
 end
