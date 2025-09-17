@@ -11,7 +11,6 @@ module SOpt
     using YAML
     using DelimitedFiles
     using LASS
-    using Enzyme
     using ForwardDiff
 
 

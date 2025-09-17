@@ -79,7 +79,8 @@ function Realiza_norma_σe(x::AbstractVector,  malha::LFrame.Malha, forcas::Abst
     linsolve.b[1:6*malha.nnos] .= F
 
     # Calcula o deslocamento 
-    U = LinearSolve.solve!(linsolve)[1:6*malha.nnos]
+    sol = LinearSolve.solve!(linsolve)
+    U = sol.u[1:6*malha.nnos]
 
     # Evita zeros em U
     #

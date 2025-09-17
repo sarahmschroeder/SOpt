@@ -6,7 +6,6 @@ version = "1.0.0"
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
-Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 LASS = "0007cf47-3fef-45af-9c21-cdf818bb7c9e"
 LFrame = "ff7349aa-6be6-4087-9dfe-a9fea3953284"
@@ -19,7 +18,6 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
 DelimitedFiles = "1.9.1"
-Enzyme = "0.13.75"
 ForwardDiff = "1.2.1"
 LASS = "0.1.0"
 LinearSolve = "3.40.0"
