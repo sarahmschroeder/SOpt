@@ -1,13 +1,18 @@
 #
 # Monta o sistema KU=F .... INFLUENCIADO POR ρ
 #
-function Monta_sistema(ρ, malha::LFrame.Malha)
+function Monta_sistema(ρ::AbstractVector{T}, malha::LFrame.Malha) where T
 
     # Monta a matriz de rigidez global
     KG = LFrame.Monta_Kg(malha,ρ)
 
+    # Número de nós 
+    nnos = malha.nnos
+
     # Monta o vetor global de forças concentradas - não muda
-    FG = LFrame.Monta_FG(malha)
+    # e não precisamos dele exatamente agora...só para alocar 
+    # no linsolve
+    FG = zeros(6*nnos) #Monta_FG(forcas,nnos)
 
     # Modifica o sistema para considerar as restrições de apoios 
     KA, FA = LFrame.Aumenta_sistema(malha, KG, FG)
@@ -39,24 +44,18 @@ end
 #
 # 
 #
-function Driver_f(ρ::AbstractVector{T}, x::AbstractVector, malha::LFrame.Malha) where T
+function Driver_f(ρ::AbstractVector{T}, x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix) where T
 
     #
     # O cáculo da resposta aleatória não depende de alteração do ρ
     # Assim, podemos montar um problema linear e modificar somente
-    # o r.h.s do KU=F
+    # o r.h.s do KU = F
     linsolve = Monta_sistema(ρ,malha)
 
     # Cálculo da norma das tensões
-    Realiza_norma_σe(x,malha,linsolve)
-
-    # Dada a distribuição das variáveis de projeto, calcula a resposta da 
-    # tensão equivalente com o LASS
-    #Eσe, Varσe = Lass(bins,  x -> f(x))  
+    Realiza_norma_σe(x,malha,forcas,linsolve)
 
 end
-
-
 
 
 
@@ -65,13 +64,16 @@ end
 #
 # x são as variáveis aleatórias
 #
-function Realiza_norma_σe(x::AbstractVector,  malha, linsolve, P=2.0)
+function Realiza_norma_σe(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix,  linsolve, P=2.0)
 
     # Aplica as forças
-    aplica_loads!(malha, x)
+    aplica_loads!(forcas, x)
+
+    # Número de nós 
+    nnos = malha.nnos
 
     # Monta o vetor de forças 
-    F = LFrame.Monta_FG(malha)
+    F = Monta_FG(forcas,nnos)
 
     # Modifica o rhs
     linsolve.b[1:6*malha.nnos] .= F
@@ -96,47 +98,3 @@ function Realiza_norma_σe(x::AbstractVector,  malha, linsolve, P=2.0)
 
 end
 
-
-#=
-# Função que devolve a derivada da norma p das σe
-function Realiza_derivada_norma_σe(x::Vector,  malha, ρ::Vector, P=8.0)
-
-    # Aplica as forças
-    aplica_loads!(malha, x)
-
-    # Calcula a resposta da estrutura
-    U,_ = Analise3D(malha,false;ρ0=ρ)
-
-    # Aloca os vetores Adjunto e da derivada parcial 
-    Fλ = similar(U)
-    ∂D = zeros(malha.ne)
-
-    # 
-
-    # Monta o vetor de carregamento adjunto e também o vetor das derivadas
-    # parciais da norma em relação as variáveis de projeto
-    #
-    # Fλ, D <- .....
-    # 
-    #
-
-    # Soluciona o problema adjunto 
-    #
-    # λ <- solução de K λ = Fλ
-    #
-
-    # Ultimos calculos e devolve a derivada
-
-    # Calcula tensoes equivalentes
-    #σe = tensao_equivalente(U, malha)
-
-    # Calcula norma P
-    #norma = norm(σe,P) # sum((σ^P))^(1/P)
-
-    # Devolve
-    return Dnorma
-
-end
-
-
-=#

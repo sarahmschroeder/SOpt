@@ -15,12 +15,17 @@ function main_otim(arquivo,nr=100_000)
     # Vetor de variáveis de projeto  
     ρ0 = 0.5*ones(ne)
 
+    # Copia das informações sobre forças concentradas 
+    # para podermos utilizazar uma estrutura não mutável 
+    # para a malha
+    forcas = malha.loads
+
     # Recupera as intensidades originais das forças, conforme informado no yaml
-    forcas0 = malha.loads[:,3]
+    forcas0 = forcas[:,3]
 
     # Vamos gerar as realizações para utilizar ao longo da otimização 
     # matriz com nforcas × nr
-    realizacoes = gera_distribuicoesforcas(malha,forcas0,nr)
+    realizacoes = gera_distribuicoesforcas(forcas,forcas0,nr)
 
     # Grava as realizações para estudo posterior
     writedlm("realizacoes.txt", realizacoes)
@@ -45,13 +50,13 @@ function main_otim(arquivo,nr=100_000)
     # Driver para calcular a resposta para um dado x
     #
     #
-    funcaox(x) =  Driver_f(ρ0, x, malha)
+    funcaox(x) =  Driver_f(ρ0, x, malha, forcas)
 
     # Derivada em relação ao ρ (otimização) para um x fixo
-    function derivada(x,ρ0)
+    function derivada(x,ρ0,forcas)
 
         # Substitui o valor de x 
-        funcaoρ(ρ) =  Driver_f(ρ, x, malha)
+        funcaoρ(ρ) =  Driver_f(ρ, x, malha, forcas)
 
         # Calcula a derivada
         ForwardDiff.gradient(funcaoρ,ρ0)
@@ -69,7 +74,7 @@ function main_otim(arquivo,nr=100_000)
 
 
     # Calcula a derivada 
-    dEσe, dVarσe = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ0), malha.ne)  
+    dEσe, dVarσe = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ0,forcas), malha.ne)  
 
     @show Eσe, Varσe, dEσe, dVarσe
 
