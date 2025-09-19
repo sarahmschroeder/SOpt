@@ -19,7 +19,7 @@ module SOpt
     include("main_otim.jl")
     include("tensao2.jl")
     include("forcas.jl")
-    include("driver_analise_tensao.jl")
+    include("restricao_global.jl")
     #include("LASS/lass.jl")    
     #include("auxiliar.jl")
     #include("tensao.jl")

@@ -44,7 +44,7 @@ end
 #
 # 
 #
-function Driver_f(ρ::AbstractVector{T}, x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix) where T
+function Realiza_gσ(ρ::AbstractVector{T}, x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix, σ_Y) where T
 
     #
     # O cáculo da resposta aleatória não depende de alteração do ρ
@@ -53,18 +53,18 @@ function Driver_f(ρ::AbstractVector{T}, x::AbstractVector, malha::LFrame.Malha,
     linsolve = Monta_sistema(ρ,malha)
 
     # Cálculo da norma das tensões
-    Realiza_norma_σe(x,malha,forcas,linsolve)
+    Calcula_gσ(x,malha,forcas,linsolve,σ_Y)
 
 end
 
 
 
 #
-# Função que devolve a norma p das σe
+# Função que devolve a restrição global de tensão
 #
 # x são as variáveis aleatórias
 #
-function Realiza_norma_σe(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix,  linsolve, P=2.0)
+function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix,  linsolve, σ_Y, P=2.0)
 
     # Aplica as forças
     aplica_loads!(forcas, x)
@@ -95,7 +95,7 @@ function Realiza_norma_σe(x::AbstractVector,  malha::LFrame.Malha, forcas::Abst
     norma = norm(σe,P)
 
     # Devolve
-    return norma
+    return (norma/σ_Y - 1)
 
 end
 
