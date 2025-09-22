@@ -1,3 +1,7 @@
+#####################################################################################################
+#                                      MONTAGEM DE MATRIZES AUXILIARES                              #
+#####################################################################################################
+
 # Função que monta a matriz VM (Matriz utilizada no vetor de tensõesasumindo a ordem xx_N xy_T e xx_M)
 function Matriz_VM()
 

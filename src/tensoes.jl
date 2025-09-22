@@ -1,3 +1,7 @@
+################################################################################################
+#                            ROTINAS PARA CÁLCULOS DE TENSÕES (e forças generalizadas)         #
+################################################################################################
+
 function tensao_equivalente(U::Vector{T}, malha) where T
 
     # Número de elementos na malha
@@ -113,14 +117,7 @@ end
 
 
 
-
-#
-#
-#
-#
-#
-
-function PIRATA_Forcas_elemento(ele,malha::LFrame.Malha,U::Vector{Float64})
+function Forcas_elemento(ele,malha::LFrame.Malha,U::Vector{Float64})
     
     # Recupera dados da estrutura malha
     conect = malha.conect
@@ -175,7 +172,7 @@ function Derivada_norma(U, malha)
     for ele=1:ne
 
        # F, K, R, e gls
-       F0e,Ke,Re,glse = PIRATA_Forcas_elemento(ele,malha,U)
+       F0e,Ke,Re,glse = Forcas_elemento(ele,malha,U)
 
        # Parametrização para o elemento 
        fe  = ρ[ele]
