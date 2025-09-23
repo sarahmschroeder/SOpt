@@ -17,9 +17,10 @@ module SOpt
     # Carrega os modulos
     #include("main.jl")
     include("main_otim.jl")
-    include("tensao2.jl")
+    include("tensoes.jl")
     include("forcas.jl")
     include("restricao_global.jl")
+    include("volume.jl")
     #include("LASS/lass.jl")    
     #include("auxiliar.jl")
     #include("tensao.jl")

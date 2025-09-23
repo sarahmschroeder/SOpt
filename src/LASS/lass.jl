@@ -1,6 +1,6 @@
-# Código que define uma subrotina que recebe o vetor x com os valores
-# que serão utilizadas para descrever o carregamento. Pega esse vetor e a 
-# estrutura de malha, roda a análise, calcula o vetor de tensões, a norma e devolve
+###############################################################################################
+#                             ROTINAS REFERENTES AO USO DO LASS (em desuso)                   #
+###############################################################################################
 
 
 
@@ -21,9 +21,6 @@ function extrai_loads(malha)
     return locais 
 
 end
-
-
-
 
 #
 # Gera todas as realizações de forças para usar no LASS
@@ -94,7 +91,6 @@ function distribui_tensoes(malha, realizacoes)
 end
 
 
-# --- LASS EM AÇÃO :))))
 function roda_lass(malha,n_r)
 
     # Define distribuições das forças 

@@ -1,6 +1,7 @@
 ################################################################################################
-#                            ROTINAS PARA CÁLCULOS DE TENSÕES (e forças generalizadas)         #
+#                        ROTINAS PARA CÁLCULOS DE TENSÕES (e forças generalizadas)             #
 ################################################################################################
+
 
 function tensao_equivalente(U::Vector{T}, malha) where T
 
@@ -159,13 +160,13 @@ function Forcas_elemento(ele,malha::LFrame.Malha,U::Vector{Float64})
 end
 
 
-function Derivada_norma(U, malha)
+function Derivada_norma(U, malha, ne::Int64, dicionario_geometrias, dicionario_materiais, L::Vector, ρ::Vector, dados_elementos::Matrix{String})
 
     # Número de elementos na malha
     ne = malha.ne
 
     # Monta a matriz V
-    V = 
+    V = Volume(ne, dicionario_geometrias, dicionario_materiais, L, ρ, dados_elementos)
 
     # Loops por elemento/nó/pto
     cont = 1

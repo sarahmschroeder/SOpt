@@ -1,9 +1,9 @@
-#
-# Função principal por enquanto pra rodarmos os Testes
-#
-# arquivo <- yaml com os dados da malha
-# n_r     <- número de realizações
-#
+#######################################################################################################
+#                                         ROTINA PRINCIPAL                                            #
+#######################################################################################################
+
+
+
 function main_otim(arquivo,nr=100_000)
 
     # Tensão de escoamento 
