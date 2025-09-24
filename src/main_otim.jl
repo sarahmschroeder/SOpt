@@ -18,6 +18,11 @@ function main_otim(arquivo,nr=100_000)
     # Vetor de variáveis de projeto  
     ρ0 = 0.5*ones(ne)
 
+    # Restrições laterais do problema
+    ρmin = 1E-3*ones(ne)
+    ρmax = ones(ne)
+
+
     # Copia das informações sobre forças concentradas 
     # para podermos utilizazar uma estrutura não mutável 
     # para a malha
@@ -42,52 +47,75 @@ function main_otim(arquivo,nr=100_000)
     # Gera bins
     bins = Generate_bins(realizacoes, Nb)
 
-    
-    # Inicializa r e μ
+    # Número de iterações do procedimento de otimização
+    niter = 2
+
+    # Número de restrições
+    m = 1
+
+    # Penalização inicial
+    r0 = 1.0
+
+    # Alocando o vetor μ
+    μ = zeros(m)
+
+
+    # DRIVER
+    LA(ρ) = Driver(ρ, bins, r0, malha, μ, sigma_y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
+                dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
+                LA)
+    dLA(ρ) = Driver(ρ, bins, r0, malha, μ, sigma_y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
+                    dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
+                    dLA)
+
+    restr(ρ) = Driver(ρ, bins, r0, malha, μ, sigma_y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
+                    dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
+                    gσ)
+
+    equil(ρ) = Driver(ρ, bins, r0, malha, μ, sigma_y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
+                      dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
+                      U)
+                    
+
     
     # Loop externo do LA
+    # Loop de otimização que vai alterar os ρ para minimizar a função objetivo
+    # e satistfazer a restrição de tensão incerta
+    for iter=1:niter
 
-    # Loop interno do LA  <- aqui vai usar as funções para calcular os E,Var, dE e dVar 
+        # Início do loop interno, de otimização, que vai devolver x*
+        options = WallE.Init()
+        options["NITER"] = 1_000
+        output = WallE.Solve(LA,dLA,ρ0,ρmin,ρmax,options)
 
-    # Atualiza μ e r 
+        # Recovering solution
+        ρ = output["RESULT"]
+        flag_converged = output["CONVERGED"]
+        opt_norm = output["NORM"]
+        @show flag_converged, opt_norm
+        
+        # Agora vamos precisar calcular a restrição atualizada
+        g = restr(ρ)
 
+        # Atualiza a penalização
+        r0 = r0*1.1
 
-    ########################################################################################
-    # 
-    #                        O QUE IMPORTA PARA O CÓDIGO DE OTIMIZAÇÃO
-    #
-    ########################################################################################
-    #
-    #
-    # Driver para calcular a resposta para um dado x considerando o resto fixo
-    #
-    #
-    funcaox(x) =  Realiza_gσ(ρ0, x, malha, forcas,σ_Y)
+        # Atualiza os multiplicadores
+        μ .= Heaviside.(μ .+ r0*g1)
 
-    # Dada a distribuição das variáveis de projeto, calcula a resposta da 
-    # tensão equivalente com o LASS
-    Egσ, Vargσ = Lass(bins,  x -> funcaox(x))  
+        #@show g1, μ, g.*μ
 
-    ##########################################################
-    # Derivada em relação ao ρ (otimização) para um x fixo
-    #########################################################
-    function derivada(x,ρ0,forcas)
+        # Atualiza o ponto de ótimo
+        ρ0 .= ρ
 
-        # Substitui o valor de x 
-        funcaoρ(ρ) =  Realiza_gσ(ρ, x, malha, forcas, σ_Y)
-
-        # Calcula a derivada
-        ForwardDiff.gradient(funcaoρ,ρ0)
-
+        # Critério de parada seria 
+        if all(g1.*μ.<=1E-6)
+            println("Critério de parada atingido na iteração $iter ",g1.*μ)
+            break
+        end
+        
+        
     end
-
-    #
-    # Calcula a derivada em relação ao ρ usando o LASS
-    #
-    dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ0,forcas), malha.ne)  
-
-    #########################################################################################
-
 
 
 end

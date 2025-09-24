@@ -4,7 +4,7 @@
 
 function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, μ::Vector, sigma_y::Float64,
                 m::Int64, ne,nnos,elems,dados_elementos,dicionario_materiais, 
-                dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos,
+                dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
                 opcao::String)
 
 
@@ -67,11 +67,8 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
         Calcula_gσ(x,malha,forcas,linsolve,σ_Y)
 
         # Devolve
-        if op == "gσ"
-            return gσ
-        end
-
-
+        return gσ
+    
     end
 
     #
@@ -116,13 +113,56 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
 
     end
 
+    gσ = Calcula_gσ(ρ, x, malha, forcas, σ_Y)
+
+    if op == "gσ"
+        return gσ
+    end
+
+    # Objetivo:
+    LA = (r0/2)*Heaviside(μ[i]/r0 + gσ)^2
+
+    if opcao=="LA"
+        return LA
+    end
+
 
     ################################################# DERIVADAS ###################################################
 
     # Derivada da função objetivo
     dV = Derivada_volume(ne, dicionario_geometrias, L, dados_elementos)
 
-    # Agora o que falta: colocar a derivada da LA??
+    # Calcula a derivada da restrição: no nosso caso a dE e dVar
+    funcaox(x) =  Realiza_gσ(ρ0, x, malha, forcas,σ_Y)
+
+    # Dada a distribuição das variáveis de projeto, calcula a resposta da 
+    # tensão equivalente com o LASS
+    Egσ, Vargσ = Lass(bins,  x -> funcaox(x))  
+
+    ##########################################################
+    # Derivada em relação ao ρ (otimização) para um x fixo
+    #########################################################
+    function derivada(x,ρ0,forcas)
+
+        # Substitui o valor de x 
+        funcaoρ(ρ) =  Realiza_gσ(ρ, x, malha, forcas, σ_Y)
+
+        # Calcula a derivada
+        ForwardDiff.gradient(funcaoρ,ρ0)
+
+    end
+
+    #
+    # Calcula a derivada em relação ao ρ usando o LASS
+    #
+    dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ0,forcas), malha.ne)
+
+    # Derivada da LA
+    dLA = dV + (r0)*Heaviside(μ[1]/r0 + g[1])*(dE + β*dVar)
+
+    if opcao == "dLA"
+        return dLA
+    end
     
 
     # 
