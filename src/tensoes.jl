@@ -106,9 +106,6 @@ function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::Vector{TF}; verbose=fal
 
     # Podemos calcular a tensão equivalente de von-Mises neste
     # ponto
-    #
-    # XUNXÂÂÂÂÂÂO PARA EVITAR DIVISÕES POR ZERO NAS DF
-    #
     σe = sqrt( (σ_N+σ_M)^2 + 3*τ^2 + 1E-6^2)
 
     # Retorna  a tensão equivalente no ele, nó, pto

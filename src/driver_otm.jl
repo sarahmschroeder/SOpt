@@ -47,7 +47,7 @@ function Realiza_gσ(ρ::AbstractVector{T}, x::AbstractVector, malha::LFrame.Mal
     linsolve = Monta_sistema(ρ,malha)
 
     # Cálculo da norma das tensões
-    gσ = Calcula_gσ(x,malha,forcas,linsolve,σ_Y,β)
+    gσ = Calcula_gσ(x,malha,forcas,linsolve,σ_Y)
 
     # Devolve
     return gσ
@@ -59,7 +59,7 @@ end
 #
 # x são as variáveis aleatórias
 # 
-function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix,  linsolve, σ_Y, P=2.0, U::Vector, β=3.0)
+function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix,  linsolve, σ_Y, P=2.0,)
 
     # Aplica as forças
     aplica_loads!(forcas, x)
@@ -72,11 +72,16 @@ function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMa
 
     # Modifica o rhs
     linsolve.b[1:6*malha.nnos] .= F
+
+    # Calcula o deslocamento 
+    sol = LinearSolve.solve!(linsolve)
+    U = sol.u[1:6*malha.nnos]
+
+    # Evita zeros em U
+    U .+= 1E-12
     
     # Calcula tensoes equivalentes
     σe = tensao_equivalente(U, malha)
-
-    # O que está entre as linhas 81 e 85 não é usado? ......
 
     # Calcula norma P
     norma = norm(σe,P)
@@ -84,14 +89,7 @@ function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMa
     # A restrição determinística é
     gd = norma/σ_Y
 
-    # Dada a distribuição das variáveis de projeto, calcula a resposta da 
-    # tensão equivalente com o LASS
-    Egσ, Vargσ = Lass(bins,  x -> funcaox(x))  
-
-    # A restrição robusta é
-    gr = Egσ + β*Vargσ
-
-    return gr
+    return gd
     
 
 end
@@ -120,12 +118,11 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     ####################################### EQUILIBRIO ##############################################
 
     # Calcula o deslocamento 
+    linsolve = Monta_sistema(ρ, malha)
     sol = LinearSolve.solve!(linsolve)
     U = sol.u[1:6*malha.nnos]
 
     # Evita zeros em U
-    #
-    #
     U .+= 1E-12
 
     if opcao == "U"
@@ -139,14 +136,14 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
 
     ################################## RESTRIÇÃO DE TENSÃO #############################################
 
-    gr = Calcula_gσ(ρ, x, malha, forcas, σ_Y, U)
+    gr = Calcula_gσ(x, malha, forcas, σ_Y)
 
     if opcao == "gσ"
         return gr
     end
 
     # Objetivo:
-    LA = V + (r0/2)*Heaviside(μ[i]/r0 + gσ)^2
+    LA = V + (r0/2)*Heaviside(μ[i]/r0 + gr)^2
 
     if opcao=="LA"
         return LA
@@ -161,13 +158,21 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     # Calcula a derivada da restrição: no nosso caso a dE e dVar
     funcaox(x) =  Realiza_gσ(ρ0, x, malha, forcas,σ_Y)
 
-    #
+    # Dada a distribuição das variáveis de projeto, calcula a resposta da 
+    # tensão equivalente com o LASS
+    Egσ, Vargσ = Lass(bins,  x -> funcaox(x)) 
+    
+    # Definindo β:
+    β = 3.0
+
+    # A restrição robusta é
+    gr = Egσ + β*Vargσ
+
     # Calcula a derivada em relação ao ρ usando o LASS
-    #
     dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ0,forcas, σ_Y, malha), malha.ne)
 
     # Derivada da LA
-    dLA = dV + (r0)*Heaviside(μ[1]/r0 + g[1])*(dEgσ + β*dVargσ)
+    dLA = dV + (r0)*Heaviside(μ[1]/r0 + gr)*(dEgσ + β*dVargσ)
 
     if opcao == "dLA"
         return dLA
