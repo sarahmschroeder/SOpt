@@ -56,8 +56,8 @@ function main_otim(arquivo,nr=100_000)
     # Penalização inicial
     r0 = 1.0
 
-    # Alocando o vetor μ
-    μ = zeros(m)
+    # μ inicial
+    μ = 0.0
 
 
     # DRIVER
@@ -101,7 +101,7 @@ function main_otim(arquivo,nr=100_000)
         r0 = r0*1.1
 
         # Atualiza os multiplicadores
-        μ .= Heaviside.(μ .+ r0*g1)
+        μ .= Heaviside.(μ .+ r0*g)
 
         #@show g1, μ, g.*μ
 

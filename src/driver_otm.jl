@@ -30,13 +30,13 @@ function Monta_sistema(ρ::AbstractVector{T}, malha::LFrame.Malha) where T
     linsolve = LinearSolve.init(prob,KLUFactorization())
 
 
-    # Retorna o sistema linear 
+    # Retorna o *sistema linear* 
     return linsolve
 
 end
 
 #
-# Função que faz o cálculo da restrição aleatória
+# Função que faz o cálculo da restrição *aleatória*
 #
 function Realiza_gσ(ρ::AbstractVector{T}, x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix, σ_Y) where T
 
@@ -46,11 +46,12 @@ function Realiza_gσ(ρ::AbstractVector{T}, x::AbstractVector, malha::LFrame.Mal
     # o r.h.s do KU = F
     linsolve = Monta_sistema(ρ,malha)
 
-    # Cálculo da norma das tensões
-    gσ = Calcula_gσ(x,malha,forcas,linsolve,σ_Y)
+    # Cálculo da norma das tensões considerando a variável aleatória, o resultado disso vai ser o argumento (de tensão)
+    # que vai pro LASS
+    funcaox = Calcula_gσ(x,malha,forcas,linsolve,σ_Y)
 
     # Devolve
-    return gσ
+    return funcaox
     
 end
 
@@ -105,7 +106,7 @@ function derivada(x,ρ0,forcas, σ_Y, malha)
 
 end
 
-function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, μ::Vector,  σ_Y::Float64,
+function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, μ::Float64,  σ_Y::Float64,
                 m::Int64, ne,dados_elementos,dicionario_materiais, 
                 dicionario_geometrias,L, β = 3.0,
                 opcao::String)
@@ -130,20 +131,32 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     end
 
     ################################### FUNÇÃO OBJETIVO #################################################
+
     # Calcula o volume da estrutura
     V = Volume(ne,dicionario_geometrias,L,ρ, dados_elementos)
 
 
     ################################## RESTRIÇÃO DE TENSÃO #############################################
 
-    gr = Calcula_gσ(x, malha, forcas, σ_Y)
+    # Calcula a derivada da restrição: no nosso caso a dE e dVar
+    funcaox(x) =  Realiza_gσ(ρ0, x, malha, forcas,σ_Y)
+
+    # Dada a distribuição das variáveis de projeto, calcula a resposta da 
+    # tensão equivalente com o LASS
+    Egσ, Vargσ = Lass(bins,  x -> funcaox(x))
+    
+    # β foi definido na entrada da função do driver,:
+    # β = 3.0
+
+    # A restrição robusta é 
+    gr = Egσ + β*Vargσ
 
     if opcao == "gσ"
         return gr
     end
 
     # Objetivo:
-    LA = V + (r0/2)*Heaviside(μ[i]/r0 + gr)^2
+    LA = V + (r0/2)*Heaviside(μ/r0 + gr)^2
 
     if opcao=="LA"
         return LA
@@ -154,19 +167,6 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
 
     # Derivada da função objetivo
     dV = Derivada_volume(ne, dicionario_geometrias, L, dados_elementos)
-
-    # Calcula a derivada da restrição: no nosso caso a dE e dVar
-    funcaox(x) =  Realiza_gσ(ρ0, x, malha, forcas,σ_Y)
-
-    # Dada a distribuição das variáveis de projeto, calcula a resposta da 
-    # tensão equivalente com o LASS
-    Egσ, Vargσ = Lass(bins,  x -> funcaox(x)) 
-    
-    # Definindo β:
-    β = 3.0
-
-    # A restrição robusta é
-    gr = Egσ + β*Vargσ
 
     # Calcula a derivada em relação ao ρ usando o LASS
     dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ0,forcas, σ_Y, malha), malha.ne)
