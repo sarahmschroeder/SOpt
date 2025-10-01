@@ -57,22 +57,22 @@ function main_otim(arquivo,nr=100_000)
     r0 = 1.0
 
     # μ inicial
-    μ = 0.0
+    μ = zeros(m)
 
 
     # DRIVER
-    LA(ρ) = Driver(ρ, bins, r0, malha, μ, sigma_y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
+    LA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
                 dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
                 LA)
-    dLA(ρ) = Driver(ρ, bins, r0, malha, μ, sigma_y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
+    dLA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
                     dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
                     dLA)
 
-    restr(ρ) = Driver(ρ, bins, r0, malha, μ, sigma_y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
+    restr(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
                     dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
                     gσ)
 
-    equil(ρ) = Driver(ρ, bins, r0, malha, μ, sigma_y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
+    equil(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
                       dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
                       U)
                     
@@ -103,14 +103,14 @@ function main_otim(arquivo,nr=100_000)
         # Atualiza os multiplicadores
         μ .= Heaviside.(μ .+ r0*g)
 
-        #@show g1, μ, g.*μ
+        #@show g, μ, g.*μ
 
         # Atualiza o ponto de ótimo
         ρ0 .= ρ
 
         # Critério de parada seria 
         if all(g1.*μ.<=1E-6)
-            println("Critério de parada atingido na iteração $iter ",g1.*μ)
+            println("Critério de parada atingido na iteração $iter ",g.*μ)
             break
         end
         

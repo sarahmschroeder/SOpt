@@ -139,7 +139,7 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     ################################## RESTRIÇÃO DE TENSÃO #############################################
 
     # Calcula a derivada da restrição: no nosso caso a dE e dVar
-    funcaox(x) =  Realiza_gσ(ρ0, x, malha, forcas,σ_Y)
+    funcaox(x) =  Realiza_gσ(ρ, x, malha, forcas,σ_Y)
 
     # Dada a distribuição das variáveis de projeto, calcula a resposta da 
     # tensão equivalente com o LASS
@@ -156,7 +156,7 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     end
 
     # Objetivo:
-    LA = V + (r0/2)*Heaviside(μ/r0 + gr)^2
+    LA = V + (r0/2)*Heaviside(μ[1]/r0 + gr)^2
 
     if opcao=="LA"
         return LA
