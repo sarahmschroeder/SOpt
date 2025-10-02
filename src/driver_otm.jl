@@ -106,14 +106,17 @@ function derivada(x,ρ0,forcas, σ_Y, malha)
 
 end
 
+
 function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, μ::Float64,  σ_Y::Float64,
-                m::Int64, ne,dados_elementos,dicionario_materiais, 
-                dicionario_geometrias,L, β = 3.0,
-                opcao::String)
+                m::Int64,dados_elementos,dicionario_materiais, 
+                dicionario_geometrias,L, β, forcas::AbstractMatrix, opcao::String)
 
 
     #Faz a verificação da opção
-    opcao in ["LA","dLA","g","U"] || error("Driver::opção $opcao inválida")
+    opcao in ["LA","dLA","gσ","U"] || error("Driver::opção $opcao inválida")
+
+    # Número de elementos
+    ne = malha.ne
 
 
     ####################################### EQUILIBRIO ##############################################
@@ -169,7 +172,7 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     dV = Derivada_volume(ne, dicionario_geometrias, L, dados_elementos)
 
     # Calcula a derivada em relação ao ρ usando o LASS
-    dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ0,forcas, σ_Y, malha), malha.ne)
+    dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ,forcas, σ_Y, malha), malha.ne)
 
     # Derivada da LA
     dLA = dV + (r0)*Heaviside(μ[1]/r0 + gr)*(dEgσ + β*dVargσ)

@@ -59,22 +59,29 @@ function main_otim(arquivo,nr=100_000)
     # μ inicial
     μ = zeros(m)
 
+    # Beta
+    β = 3.0
+
+    # Dicionarios LFrame
+    dados_ele = malha.dados_elementos
+    
+    dicionario_mat = malha.dicionario_materiais 
+    
+    dicionario_geo = malha.dicionario_geometrias
+
 
     # DRIVER
-    LA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
-                dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
-                LA)
-    dLA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
-                    dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
-                    dLA)
+    LA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
+                dicionario_geo, L, β, forcas, "LA")
 
-    restr(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
-                    dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
-                    gσ)
+    dLA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
+                    dicionario_geo, L, β, forcas, "dLA")
 
-    equil(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m, ne,nnos,elems,dados_elementos,dicionario_materiais, 
-                      dicionario_geometrias,L,coord, loads,floads, apoios, mpc, deslocamentos, β = 3.0,
-                      U)
+    restr(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
+                    dicionario_geo, L, β, forcas, "gσ")
+
+    equil(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_elementos,dicionario_mat, 
+                      dicionario_geo, L, β, forcas, "U")
                     
 
     
@@ -109,7 +116,7 @@ function main_otim(arquivo,nr=100_000)
         ρ0 .= ρ
 
         # Critério de parada seria 
-        if all(g1.*μ.<=1E-6)
+        if all(g.*μ.<=1E-6)
             println("Critério de parada atingido na iteração $iter ",g.*μ)
             break
         end
