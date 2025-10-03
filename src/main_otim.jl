@@ -4,7 +4,7 @@
 
 
 
-function main_otim(arquivo,nr=100_000)
+function main_otim(arquivo,nr=10)
 
     # Tensão de escoamento 
     σ_Y = 200.0
