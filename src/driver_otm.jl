@@ -123,11 +123,24 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
 
     # Calcula o deslocamento 
     linsolve = Monta_sistema(ρ, malha)
-    sol = LinearSolve.solve!(linsolve)
+
+    # Monta as forças verdadeiras
+    FG = Monta_FG(forcas, malha.nnos)
+
+    F = FG 
+
+    # Aplica condições de contorno
+    _, FA = LFrame.Aumenta_sistema(malha, linsolve.A, F)
+
+    # Atualiza o lado direito no linsolve
+    linsolve.b .= FA
+
+    # Resolve com rhs correto
+    sol = LinearSolve.solve(linsolve)
     U = sol.u[1:6*malha.nnos]
 
     # Evita zeros em U
-    U .+= 1E-12
+    U .+= 1e-12
 
     if opcao == "U"
         return U
