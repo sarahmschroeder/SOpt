@@ -68,6 +68,7 @@ function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMa
     # Número de nós 
     nnos = malha.nnos
 
+
     # Monta o vetor de forças 
     F = Monta_FG(forcas,nnos)
 

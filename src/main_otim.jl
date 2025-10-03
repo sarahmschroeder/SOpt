@@ -28,6 +28,9 @@ function main_otim(arquivo,nr=10)
     # para a malha
     forcas = malha.loads
 
+    # Comprimento
+    L = malha.L
+
     # Recupera as intensidades originais das forças, conforme informado no yaml
     forcas0 = forcas[:,3]
 
