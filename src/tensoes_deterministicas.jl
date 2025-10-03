@@ -133,13 +133,13 @@ function Forcas_elemento(ele,malha::LFrame.Malha,U::Vector{Float64})
     Le = malha.L[ele]
                                                                                                                     
     # Monta a matriz do elemento no sistema local
-    Ke = Ke_portico3d(Ee, Ize, Iye, Ge, J0e, Le, Ae)
+    Ke = Lframe.Ke_portico3d(Ee, Ize, Iye, Ge, J0e, Le, Ae)
 
     # Monta a matriz de rotação do elemento
-    Re = Rotacao3d(ele, conect, coord, αe)
+    Re = Lframe.Rotacao3d(ele, conect, coord, αe)
 
     # Descobre os gls globais do elemento 
-    gls = Gls(ele,conect)   
+    gls = Lframe.Gls(ele,conect)   
  
     # Recupera os deslocamentos do elemento (ainda no sistema global)
     ug = U[gls]
