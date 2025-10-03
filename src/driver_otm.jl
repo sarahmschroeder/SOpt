@@ -108,7 +108,7 @@ function derivada(x,ρ0,forcas, σ_Y, malha)
 end
 
 
-function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, μ::Float64,  σ_Y::Float64,
+function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, μ::Vector,  σ_Y::Float64,
                 m::Int64,dados_elementos,dicionario_materiais, 
                 dicionario_geometrias,L, β, forcas::AbstractMatrix, opcao::String) where T
 
