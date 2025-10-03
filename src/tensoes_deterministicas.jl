@@ -125,7 +125,7 @@ function Forcas_elemento(ele,malha::LFrame.Malha,U::Vector{Float64})
     dicionario_geometrias = malha.dicionario_geometrias
 
     # Recupera os dados do elemento
-    Ize, Iye, J0e, Ae, αe, Ee, Ge, _ = Dados_fundamentais(ele, dados_elementos, dicionario_materiais, 
+    Ize, Iye, J0e, Ae, αe, Ee, Ge, _ = LFrame.Dados_fundamentais(ele, dados_elementos, dicionario_materiais, 
                                                            dicionario_geometrias)
     
     
