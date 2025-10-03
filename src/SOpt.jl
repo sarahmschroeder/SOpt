@@ -20,7 +20,7 @@ module SOpt
     include("main_otim.jl")
     include("driver_otm.jl")
     include("forcas.jl")
-    include("tensoes_deterministicas.jl")
+    include("tensoeS.jl")
     include("volume.jl")
     include("LASS/lass.jl")    
     include("auxiliar.jl")

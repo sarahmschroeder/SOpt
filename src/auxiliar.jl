@@ -5,6 +5,46 @@
 # Função Heaviside
 Heaviside(a) = max(a,0.0)
 
+#
+# Monta o sistema KU=F .... INFLUENCIADO POR ρ
+#
+function Monta_linsolve(ρ::AbstractVector{T}, malha::LFrame.Malha) where T
+
+    # Monta a matriz de rigidez global
+    KG = LFrame.Monta_Kg(malha,ρ)
+
+    # Número de nós 
+    nnos = malha.nnos
+
+    # Monta o vetor global de forças concentradas - não muda
+    # e não precisamos dele exatamente agora...só para alocar 
+    # no linsolve
+    FG = zeros(6*nnos) #Monta_FG(forcas,nnos)
+
+    # Modifica o sistema para considerar as restrições de apoios 
+    KA, FA = LFrame.Aumenta_sistema(malha, KG, FG)
+
+    # Cria um problema linear para ser solucionado pelo LinearSolve
+    prob = LinearSolve.LinearProblem(KA,FA)
+    linsolve = LinearSolve.init(prob,KLUFactorization())
+
+    # Retorna o *sistema linear* 
+    return linsolve
+
+end
+
+
+# Derivada em relação ao ρ (otimização) para um x fixo
+function derivada(x,ρ0,forcas, linsolve,  σ_Y, malha)
+
+    # Substitui o valor de x 
+    funcaoρ(ρ) =  Realiza_gσ(x, malha, forcas, linsolve, σ_Y)
+
+    # Calcula a derivada
+    ForwardDiff.gradient(funcaoρ,ρ0)
+
+end
+
 # Função que monta a matriz VM (Matriz utilizada no vetor de tensõesasumindo a ordem xx_N xy_T e xx_M)
 function Matriz_VM()
 

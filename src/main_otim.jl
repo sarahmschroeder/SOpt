@@ -64,6 +64,9 @@ function main_otim(arquivo,nr=10)
     # Número de desvios para a restrição robusta 
     β = 3.0
 
+    # Volume inicial
+    V0 = Volume(ne, dicionario_geometrias, dicionario_materiais, L, ρ, dados_elementos)
+
     # Dicionarios LFrame
     dados_ele = malha.dados_elementos
     
@@ -74,16 +77,16 @@ function main_otim(arquivo,nr=10)
 
     # DRIVER
     LA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
-                dicionario_geo, L, β, forcas, "LA")
+                dicionario_geo, L, β, forcas, V0, "LA")
 
     dLA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
-                    dicionario_geo, L, β, forcas, "dLA")
+                    dicionario_geo, L, β, forcas, V0, "dLA")
 
     restr(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
-                    dicionario_geo, L, β, forcas, "gσ")
+                    dicionario_geo, L, β, forcas, V0, "gσ")
 
     equil(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_elementos,dicionario_mat, 
-                      dicionario_geo, L, β, forcas, "U")
+                      dicionario_geo, L, β, forcas, V0, "U")
                     
     
     # Loop externo do LA

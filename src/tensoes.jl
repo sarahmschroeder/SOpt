@@ -3,6 +3,72 @@
 ################################################################################################
 
 
+########################## ESTOCÁSTICAS ####################################3
+
+#
+# Função que faz o cálculo da restrição *aleatória*
+#
+function Realiza_gσ(x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix, linsolve, σ_Y) 
+
+    #
+    # O cáculo da resposta aleatória não depende de alteração do ρ
+    # Assim, podemos montar um problema linear e modificar somente
+    # o r.h.s do KU = F
+    #linsolve = Monta_linsolve(ρ,malha)
+
+    # Cálculo da norma das tensões considerando a variável aleatória, o resultado disso vai ser o argumento (de tensão)
+    # que vai pro LASS
+    gσ = Calcula_gσ(x,malha,forcas,linsolve,σ_Y)
+
+    # Devolve
+    return gσ
+    
+end
+
+#
+# Função que devolve a restrição global de tensão
+#
+# x são as variáveis aleatórias
+# 
+function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix,  linsolve, σ_Y, P=2.0,)
+
+    # Aplica as forças
+    aplica_loads!(forcas, x)
+
+    # Número de nós 
+    nnos = malha.nnos
+
+    # Monta o vetor de forças 
+    F = Monta_FG(forcas,nnos)
+
+    # Modifica o rhs
+    linsolve.b[1:6*malha.nnos] .= F
+
+    # Calcula o deslocamento 
+    sol = LinearSolve.solve!(linsolve)
+    U = sol.u[1:6*malha.nnos]
+    
+    # Evita zeros em U
+    U .+= 1E-12
+    
+    # Calcula tensoes equivalentes
+    σe = tensao_equivalente(U, malha)
+
+    # Calcula norma P
+    norma = norm(σe,P)
+
+    # A restrição determinística é
+    gd = norma/σ_Y - 1
+
+    return gd
+    
+
+end
+
+#################### DETERMINÍSTICAS ##########################
+
+
+
 function tensao_equivalente(U::Vector{T}, malha) where T
 
     # Número de elementos na malha
