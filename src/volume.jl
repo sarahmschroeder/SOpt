@@ -4,6 +4,7 @@
 
 # Não seeeeeei onde deixar essas funções então vou por aqui mesmo :D
 # Calculando o volume
+
 function Volume(ne::Int64, dicionario_geometrias, dicionario_materiais, L::Vector, ρ::Vector, dados_elementos::Matrix{String})
     # Alocando o volume
     V = 0.0

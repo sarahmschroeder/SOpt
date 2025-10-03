@@ -147,27 +147,9 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
 
 
     ####################################### EQUILIBRIO ##############################################
-    
-    # U
-    U = Monta_sistema(ρ, malha)
-
-    # Monta as forças verdadeiras
-    FG = Monta_FG(forcas, malha.nnos)
-
-    F = FG 
-
-    # NOVO: Recalcula KG (matriz de rigidez não aumentada)
-    KG = LFrame.Monta_Kg(malha,ρ) 
-
-    # Aplica condições de contorno 
-    _, FA = LFrame.Aumenta_sistema(malha, KG, F) 
-
-    # Atualiza o lado direito no linsolve
-    linsolve.b .= FA
-
-    # Resolve com rhs correto
-    sol = LinearSolve.solve(linsolve)
-    U = sol.u[1:6*malha.nnos]
+   
+    # U recebe a solução do sistema KU=F, que é resolvido dentro de Monta_sistema
+    U = Monta_sistema(ρ, malha) 
 
     # Evita zeros em U
     U .+= 1e-12
@@ -179,8 +161,7 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     ################################### FUNÇÃO OBJETIVO #################################################
 
     # Calcula o volume da estrutura
-    V = Volume(ne,dicionario_geometrias,L,ρ, dados_elementos)
-
+    V = Volume(ne,dicionario_geometrias,dicionario_materiais,L,ρ, dados_elementos)
 
     ################################## RESTRIÇÃO DE TENSÃO #############################################
 
