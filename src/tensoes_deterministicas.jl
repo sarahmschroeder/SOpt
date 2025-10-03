@@ -115,7 +115,7 @@ end
 
 
 
-function Forcas_elemento(ele,malha::LFrame.Malha,U::Vector{Float64})
+function Forcas_elemento(ele,malha::LFrame.Malha, U::AbstractVector{T}) where T
     
     # Recupera dados da estrutura malha
     conect = malha.conect
@@ -171,6 +171,7 @@ function Derivada_norma(U, malha, ne::Int64, dicionario_geometrias, dicionario_m
 
        # F, K, R, e gls
        F0e,Ke,Re,glse = Forcas_elemento(ele,malha,U)
+
 
        # Parametrização para o elemento 
        fe  = ρ[ele]
