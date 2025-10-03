@@ -121,17 +121,20 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
 
 
     ####################################### EQUILIBRIO ##############################################
-
+    
     # Calcula o deslocamento 
-    linsolve = Monta_sistema(ρ, malha)
+    linsolve = Monta_sistema(ρ, malha) # linsolve.A é KA (matriz aumentada/constrained)
 
     # Monta as forças verdadeiras
     FG = Monta_FG(forcas, malha.nnos)
 
     F = FG 
 
-    # Aplica condições de contorno
-    _, FA = LFrame.Aumenta_sistema(malha, linsolve.A, F)
+    # NOVO: Recalcula KG (matriz de rigidez não aumentada)
+    KG = LFrame.Monta_Kg(malha,ρ) 
+
+    # Aplica condições de contorno 
+    _, FA = LFrame.Aumenta_sistema(malha, KG, F) 
 
     # Atualiza o lado direito no linsolve
     linsolve.b .= FA
