@@ -51,7 +51,7 @@ function main_otim(arquivo,nr=10)
     bins = Generate_bins(realizacoes, Nb)
 
     # Número de iterações do procedimento de otimização
-    niter = 2
+    niter = 100
 
     # Número de restrições
     m = 1
