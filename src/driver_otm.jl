@@ -8,8 +8,7 @@
 # Monta o sistema KU=F .... INFLUENCIADO POR ρ
 #
 
-"""
-function Monta_sistema(ρ::AbstractVector{T}, malha::LFrame.Malha) where T
+function Monta_linsolve(ρ::AbstractVector{T}, malha::LFrame.Malha) where T
 
     # Monta a matriz de rigidez global
     KG = LFrame.Monta_Kg(malha,ρ)
@@ -34,7 +33,7 @@ function Monta_sistema(ρ::AbstractVector{T}, malha::LFrame.Malha) where T
     return linsolve
 
 end
-"""
+
 
 
 function Monta_sistema(ρ::AbstractVector{T}, malha::LFrame.Malha) where T
@@ -70,7 +69,7 @@ function Realiza_gσ(ρ::AbstractVector{T}, x::AbstractVector, malha::LFrame.Mal
     # O cáculo da resposta aleatória não depende de alteração do ρ
     # Assim, podemos montar um problema linear e modificar somente
     # o r.h.s do KU = F
-    linsolve = Monta_sistema(ρ,malha)
+    linsolve = Monta_linsolve(ρ,malha)
 
     # Cálculo da norma das tensões considerando a variável aleatória, o resultado disso vai ser o argumento (de tensão)
     # que vai pro LASS
