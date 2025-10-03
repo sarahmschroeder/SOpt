@@ -30,23 +30,19 @@ function Volume(ne::Int64, dicionario_geometrias, dicionario_materiais, L::Vecto
 
 end 
 
-# Calculando a derivada do volume
-function Derivada_volume(ne::Int64, dicionario_geometrias, dicionario_materiais, L::Vector{Float64}, dados_elementos::Matrix{String})
+
+function Derivada_volume(ne::Int64, dicionario_geometrias, dicionario_materiais, L::AbstractVector{T}, ρ::AbstractVector{T}, dados_elementos::Matrix{String}) where T
     
-    # Aloca dV
-    dv = zeros(ne)
+    # Aloca dV, usando o tipo genérico T (Float64 ou Dual)
+    dv = zeros(T, ne) 
 
-    # Loop pelos elementos
     for e=1:ne
-
-        # Dados que vamos precisar:
+        # Obtém a área base (Ae)
         Ize, Iye, J0e, Ae, αe, Ee, Ge = LFrame.Dados_fundamentais(e, dados_elementos, dicionario_materiais, dicionario_geometrias)
 
-        # dV fica:
-        dv[e] = L[e]*Ae
-
+        # O gradiente é constante: ∂V/∂ρe = Ae * Le
+        dv[e] = Ae*L[e]
     end
 
     return dv
-
 end

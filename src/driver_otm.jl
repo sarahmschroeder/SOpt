@@ -192,8 +192,8 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     ################################################# DERIVADAS ###################################################
 
     # Derivada da função objetivo
-    dV = Derivada_volume(ne, dicionario_geometrias, dicionario_materiais, L, dados_elementos)
-    
+    dV = Derivada_volume(ne, dicionario_geometrias, dicionario_materiais, L, ρ, dados_elementos )
+
     # Calcula a derivada em relação ao ρ usando o LASS
     dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ,forcas, σ_Y, malha), malha.ne)
 
