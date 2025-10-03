@@ -12,6 +12,7 @@ module SOpt
     using DelimitedFiles
     using LASS
     using ForwardDiff
+    using WallE
 
 
     # Carrega os modulos
