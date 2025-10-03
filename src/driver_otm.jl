@@ -8,7 +8,7 @@
 # Monta o sistema KU=F .... INFLUENCIADO POR ρ
 #
 
-
+"""
 function Monta_sistema(ρ::AbstractVector{T}, malha::LFrame.Malha) where T
 
     # Monta a matriz de rigidez global
@@ -34,7 +34,33 @@ function Monta_sistema(ρ::AbstractVector{T}, malha::LFrame.Malha) where T
     return linsolve
 
 end
+"""
 
+
+function Monta_sistema(ρ::AbstractVector{T}, malha::LFrame.Malha) where T
+
+    # Monta a matriz de rigidez global
+    KG = LFrame.Monta_Kg(malha,ρ)
+
+    # Número de nós 
+    nnos = malha.nnos
+
+    # Monta o vetor global de forças concentradas
+    FG = Monta_FG(malha.loads, nnos) 
+    # FG = zeros(6*nnos) # Monta_FG(forcas,nnos)
+
+    # Modifica o sistema para considerar as restrições 
+    KA, FA = LFrame.Aumenta_sistema(malha, KG, FG)
+
+    # Cria e resolve o problema linear
+    prob = LinearSolve.LinearProblem(KA, FA)
+    
+    # Use o solve direto 
+    sol = LinearSolve.solve(prob, LinearSolve.KLUFactorization()) 
+    
+    # Retorna o vetor de deslocamentos
+    return sol.u 
+end
 #
 # Função que faz o cálculo da restrição *aleatória*
 #
@@ -122,8 +148,8 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
 
     ####################################### EQUILIBRIO ##############################################
     
-    # Calcula o deslocamento 
-    linsolve = Monta_sistema(ρ, malha) # linsolve.A é KA (matriz aumentada/constrained)
+    # U
+    U = Monta_sistema(ρ, malha)
 
     # Monta as forças verdadeiras
     FG = Monta_FG(forcas, malha.nnos)
