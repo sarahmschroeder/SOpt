@@ -16,12 +16,11 @@ function main_otim(arquivo,nr=10)
     ne = malha.ne
 
     # Vetor de variáveis de projeto  
-    ρ0 = 0.5*ones(ne)
+    ρ0 = ones(ne)
 
     # Restrições laterais do problema
     ρmin = 1E-3*ones(ne)
     ρmax = ones(ne)
-
 
     # Copia das informações sobre forças concentradas 
     # para podermos utilizazar uma estrutura não mutável 
@@ -51,7 +50,7 @@ function main_otim(arquivo,nr=10)
     bins = Generate_bins(realizacoes, Nb)
 
     # Número de iterações do procedimento de otimização
-    niter = 100
+    niter = 5
 
     # Número de restrições
     m = 1
@@ -62,7 +61,7 @@ function main_otim(arquivo,nr=10)
     # μ inicial
     μ = zeros(m)
 
-    # Beta
+    # Número de desvios para a restrição robusta 
     β = 3.0
 
     # Dicionarios LFrame
@@ -86,7 +85,6 @@ function main_otim(arquivo,nr=10)
     equil(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_elementos,dicionario_mat, 
                       dicionario_geo, L, β, forcas, "U")
                     
-
     
     # Loop externo do LA
     # Loop de otimização que vai alterar os ρ para minimizar a função objetivo
@@ -106,6 +104,8 @@ function main_otim(arquivo,nr=10)
         
         # Agora vamos precisar calcular a restrição atualizada
         g = restr(ρ)
+
+        @show g
 
         # Atualiza a penalização
         r0 = r0*1.1
@@ -127,5 +127,6 @@ function main_otim(arquivo,nr=10)
         
     end
 
+    return ρ0
 
 end

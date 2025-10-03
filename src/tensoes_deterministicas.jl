@@ -37,7 +37,7 @@ function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::Vector{TF}; verbose=fal
     pto in [0;1]   || error("Tensao_elemento_no_ponto::pto deve ser 0 ou 1")
 
     # Obtem o vetor de forças nos nós do elemento 
-    geo,Fe = Forcas_elemento(ele,malha,U)
+    Fe, Ke, Re, gls = Forcas_elemento(ele,malha,U)
 
     if verbose
         println("Debug no ELEMENTO $ele, NÓ $no, PONTO $pto")
