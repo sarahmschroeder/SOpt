@@ -1,0 +1,107 @@
+# Novo Exemplo: Pórtico Treliçado 3D com 21 elementos
+
+materiais:
+  - nome: "aco"
+    G: 8.0e10             # Módulo de Cisalhamento (Pa)
+    Ex: 2.1e11            # Módulo de Elasticidade (Pa)
+    S_esc: 350e6          # Tensão de Escoamento (Pa) - 350 MPa
+
+geometrias:
+  # Seção Circular Sólida: Raio R=0.1m
+  - Iz: 7.8539816e-5      # Momento de Inércia
+    A: 0.0314159265       # Área
+    Iy: 7.8539816e-5
+    nome: "tubo1"
+    α: 0
+    J0: 1.57079633e-4     # Constante de Torção
+
+coordenadas:
+  0.0 0.0 0.0
+  0.0 1.0 0.0
+  1.0 1.0 0.0
+  1.0 0.0 0.0
+  0.0 0.0 1.0
+  0.0 1.0 1.0
+  1.0 1.0 1.0
+  1.0 0.0 1.0
+
+conectividades: 
+  1 5
+  2 6
+  3 7
+  4 8
+  1 2
+  2 3
+  3 4
+  4 1
+  5 6
+  6 7
+  7 8
+  8 5
+  5 7
+  6 8
+  1 3
+  2 4
+  4 7
+  3 8
+  2 7
+  3 6
+  2 5
+  1 6
+
+  # (Engaste completo nos nós 1, 2, 3 e 4)
+apoios: 
+  1 1 0.0
+  1 2 0.0
+  1 3 0.0
+  1 4 0.0
+  1 5 0.0
+  1 6 0.0
+  2 1 0.0
+  2 2 0.0
+  2 3 0.0
+  2 4 0.0
+  2 5 0.0
+  2 6 0.0
+  3 1 0.0
+  3 2 0.0
+  3 3 0.0
+  3 4 0.0
+  3 5 0.0
+  3 6 0.0
+  4 1 0.0
+  4 2 0.0
+  4 3 0.0
+  4 4 0.0
+  4 5 0.0
+  4 6 0.0
+
+loads: 
+  7 1 5000 
+  7 3 -1000
+  6 4 2000
+  8 5 1000
+
+
+dados_elementos:
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
+  aco tubo1
