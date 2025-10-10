@@ -10,12 +10,6 @@
 #
 function Realiza_gσ(x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix, linsolve, σ_Y) 
 
-    #
-    # O cáculo da resposta aleatória não depende de alteração do ρ
-    # Assim, podemos montar um problema linear e modificar somente
-    # o r.h.s do KU = F
-    #linsolve = Monta_linsolve(ρ,malha)
-
     # Cálculo da norma das tensões considerando a variável aleatória, o resultado disso vai ser o argumento (de tensão)
     # que vai pro LASS
     gσ = Calcula_gσ(x,malha,forcas,linsolve,σ_Y)
@@ -219,70 +213,5 @@ function Forcas_elemento(ele,malha::LFrame.Malha, U::AbstractVector{T}) where T
     # Devolve as forças generalizadas nos nós deste elemento
     # a rigidez, a matriz de rotação e também os gls
     return fe, Ke, Re, gls
-
-end
-
-
-function Derivada_norma(U, malha, ne::Int64, dicionario_geometrias, dicionario_materiais, L::Vector, ρ::Vector, dados_elementos::Matrix{String})
-
-    # Número de elementos na malha
-    ne = malha.ne
-
-    # Monta a matriz V
-    V = Volume(ne, dicionario_geometrias, dicionario_materiais, L, ρ, dados_elementos)
-
-    # Loops por elemento/nó/pto
-    cont = 1
-    for ele=1:ne
-
-       # F, K, R, e gls
-       F0e,Ke,Re,glse = Forcas_elemento(ele,malha,U)
-
-
-       # Parametrização para o elemento 
-       fe  = ρ[ele]
-       dfe = 1.0
-
-       for no=1:2
-
-           # Aqui monta a M
-
-           for pto=0:1
-
-               # Monta a P 
-
-               # Aqui podemos calcular o σi^0
-               #σi0 = ....
-
-               # a tensão sigma i será f_ele * σi0
-               σi = fe*σi0
-
-               # Calcula a tensão equivalente σeq0
-               #σeq0 = ...
-
-               # podemos calcular a tensão equivalente 0 
-               contrib1 = fe*dfe*σeqi0^2
-
-               # Não esquecer de multiplicar pelas σeq...
-               ∂D[ele] += contrib1
-
-               # Contrib para o adjunto (cacaradas na frente...)
-               flocal =  fe*σi*V*P*D*Mn*Ke*Re
-
-               # Contribuição para o vetor de carregamento global 
-               Fλ[glse] .+= vec(flocal) 
-
-            end
-        end  
-    end
-
-    # Usando o linsolve do LFrame 
-    # linsolve.b ....Fλ
-    # obtem o λ
-    # Monta as derivadas...
- 
-
-    # Podemos retornar os vetores 
-    return Derivada
 
 end

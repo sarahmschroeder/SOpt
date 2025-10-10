@@ -71,8 +71,6 @@ function main_otim(arquivo,nr=10)
     
     dicionario_geo = malha.dicionario_geometrias
 
-
-
     # DRIVER
     LA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
                 dicionario_geo, L, β, forcas, "LA")
@@ -82,10 +80,6 @@ function main_otim(arquivo,nr=10)
 
     restr(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
                     dicionario_geo, L, β, forcas, "gσ")
-
-    equil(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_elementos,dicionario_mat, 
-                      dicionario_geo, L, β, forcas, "U")
-                    
     
     # Loop externo do LA
     # Loop de otimização que vai alterar os ρ para minimizar a função objetivo

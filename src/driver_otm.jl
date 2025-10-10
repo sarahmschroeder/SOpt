@@ -2,9 +2,6 @@
 #                                          ROTINA DO DRIVER DE OTIMIZAÇÃO                                                  #
 ############################################################################################################################
 
-
-
-
 function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, μ::Vector,  σ_Y::Float64,
                 m::Int64,dados_elementos,dicionario_materiais, 
                 dicionario_geometrias,L, β, forcas::AbstractMatrix, opcao::String) where T
@@ -33,31 +30,28 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
 
     ################################## RESTRIÇÃO DE TENSÃO #############################################
 
-    # Calcula a derivada da restrição: no nosso caso a E e Var
+    # Alias para calcular a restrição de tensão em função de x 
     funcaox(x) =  Realiza_gσ(x, malha, forcas, linsolve, σ_Y)
 
-    # Dada a distribuição das variáveis de projeto, calcula a resposta da 
-    # tensão equivalente com o LASS
+    # Dada a distribuição das variáveis de projeto, calcula a 
+    # média e a variância da restrição de tensão equivalente 
+    # utilizando o LASS
     Egσ, Vargσ = Lass(bins,  x -> funcaox(x))
-    
-    #@show V
-    #@show  Egσ, Vargσ
 
-
-    # A restrição robusta é 
+    # Com isso, a restrição robusta é 
     gr = Egσ + β*Vargσ
 
-    #@show gr
-
+    # Se solicitado, devolve a restrição 
     if opcao == "gσ"
         return gr
     end
 
-    # Objetivo:
+    # Lagrangiano aumentado
     LA = V/V0 + (r0/2)*Heaviside(μ[1]/r0 + gr)^2
 
-    #@show V/V_ESCALA, (r0/2)*Heaviside(μ[1]/r0 + gr)^2
+    #@show V/V0, (r0/2)*Heaviside(μ[1]/r0 + gr)^2
 
+    # Se solicitado, retorna o LA 
     if opcao=="LA"
         return LA
     end
@@ -65,33 +59,19 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
 
     ################################################# DERIVADAS ###################################################
 
-    # Derivada da função objetivo
+    # Derivada da função objetivo - Volume 
     dV = Derivada_volume(ne, dicionario_geometrias, dicionario_materiais, L, ρ, dados_elementos )
 
-    # Calcula a derivada em relação ao ρ usando o LASS
+    # Calcula a derivada do valor esperado e da variância em relação ao ρ usando o LASS
     dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ,forcas, linsolve, σ_Y, malha), malha.ne)
 
-    # Derivada da LA
+    # Derivada da função Lagrangiano aumentado
     dLA = dV./V0 + (r0)*Heaviside(μ[1]/r0 + gr)*(dEgσ + β*dVargσ)
 
+    # Caso solicitado, retorna a derivada
     if opcao == "dLA"
         return dLA
     end
     
-
-    # 
-    #
-    #
-    #             Driver para receber um conjunto de variáveis de projeto e devolver o objetivo e a restrição global de tensões
-    #
-    #
-    # ρ -> vetor com ne variáveis de projeto
-    #
-    # bins <- Generate_bins(realizacoes, Nb) <-  realizacoes <- gera_distribuicoesforcas(malha, n_r=100, σ2=0.4)
-    #
-    # 
-    #
-
-
 end
 
