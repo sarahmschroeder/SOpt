@@ -7,8 +7,7 @@
 
 function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, μ::Vector,  σ_Y::Float64,
                 m::Int64,dados_elementos,dicionario_materiais, 
-                dicionario_geometrias,L, β, forcas::AbstractMatrix, V0::Float64,  opcao::String) where T
-
+                dicionario_geometrias,L, β, forcas::AbstractMatrix, opcao::String) where T
 
 
     #Faz a verificação da opção
@@ -24,6 +23,10 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     linsolve =  Monta_linsolve(ρ, malha)
 
     ################################### FUNÇÃO OBJETIVO #################################################
+
+    # Volume inicial
+    #V0 = Volume(ne, dicionario_geometrias, dicionario_materiais, L, ρ, dados_elementos)
+    V0 = 1.0
 
     # Calcula o volume da estrutura
     V = Volume(ne,dicionario_geometrias,dicionario_materiais,L,ρ, dados_elementos)

@@ -71,22 +71,20 @@ function main_otim(arquivo,nr=10)
     
     dicionario_geo = malha.dicionario_geometrias
 
-    # Volume inicial
-    V0 = Volume(ne, dicionario_geo, dicionario_mat, L, ρ, dados_ele)
 
 
     # DRIVER
     LA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
-                dicionario_geo, L, β, forcas, V0, "LA")
+                dicionario_geo, L, β, forcas, "LA")
 
     dLA(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
-                    dicionario_geo, L, β, forcas, V0, "dLA")
+                    dicionario_geo, L, β, forcas, "dLA")
 
     restr(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_ele,dicionario_mat, 
-                    dicionario_geo, L, β, forcas, V0, "gσ")
+                    dicionario_geo, L, β, forcas, "gσ")
 
     equil(ρ) = Driver(ρ, bins, r0, malha, μ, σ_Y,m,dados_elementos,dicionario_mat, 
-                      dicionario_geo, L, β, forcas, V0, "U")
+                      dicionario_geo, L, β, forcas, "U")
                     
     
     # Loop externo do LA
