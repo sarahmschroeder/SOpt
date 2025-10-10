@@ -19,6 +19,7 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
 DelimitedFiles = "1.9.1"
+Distributions = "0.25.122"
 ForwardDiff = "1.2.1"
 LASS = "0.1.0"
 LFrame = "1.1.0"

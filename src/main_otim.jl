@@ -64,15 +64,15 @@ function main_otim(arquivo,nr=10)
     # Número de desvios para a restrição robusta 
     β = 3.0
 
-    # Volume inicial
-    V0 = Volume(ne, dicionario_geometrias, dicionario_materiais, L, ρ, dados_elementos)
-
     # Dicionarios LFrame
     dados_ele = malha.dados_elementos
     
     dicionario_mat = malha.dicionario_materiais 
     
     dicionario_geo = malha.dicionario_geometrias
+
+    # Volume inicial
+    V0 = Volume(ne, dicionario_geo, dicionario_mat, L, ρ, dados_ele)
 
 
     # DRIVER
