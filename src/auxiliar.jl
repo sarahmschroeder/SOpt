@@ -38,7 +38,7 @@ end
 function derivada(x,ρ0,forcas, linsolve,  σ_Y, malha)
 
     # Substitui o valor de x 
-    funcaoρ(ρ) =  Realiza_gσ(x, malha, forcas, linsolve, σ_Y)
+    funcaoρ(ρ) =  Realiza_gσ(x, malha, forcas, linsolve, σ_Y, ρ)
 
     # Calcula a derivada
     ForwardDiff.gradient(funcaoρ,ρ0)

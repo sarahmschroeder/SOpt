@@ -8,7 +8,7 @@
 #
 # Função que faz o cálculo da restrição *aleatória*
 #
-function Realiza_gσ(x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix, linsolve, σ_Y, ρ) 
+function Realiza_gσ(x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix, linsolve, σ_Y, ρ::AbstractVector{T}) where T
 
     # Cálculo da norma das tensões considerando a variável aleatória, o resultado disso vai ser o argumento (de tensão)
     # que vai pro LASS
@@ -24,7 +24,7 @@ end
 #
 # x são as variáveis aleatórias
 # 
-function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix,  linsolve, σ_Y, P=8.0, ρ)
+function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix,  linsolve, σ_Y, ρ::AbstractVector{T}, P=8.0) where T
 
     # Aplica as forças
     aplica_loads!(forcas, x)
@@ -63,14 +63,18 @@ end
 
 
 
-function tensao_equivalente(U::Vector{T}, malha, ρ) where T
-
+#function tensao_equivalente(U::Vector{T}, malha, ρ::AbstractVector{T}) where T
+function tensao_equivalente(U::AbstractVector{TU}, malha, ρ::AbstractVector{TR}) where {TU, TR}
     # Número de elementos na malha
     ne = malha.ne
 
     # Loop pelos elementos da malha, calculando as 
     # tensões ...
-    σ_eq = zeros(T,4*ne) #Float64[]
+    #σ_eq = zeros(T,4*ne) #Float64[]
+    # Usa promote_type para obter o tipo mais genérico (será Dual, se TR for Dual)
+    T_out = promote_type(TU, TR) 
+    σ_eq = zeros(T_out, 4*ne) 
+
 
     # Loops por elemento/nó/pto
     cont = 1
@@ -90,7 +94,8 @@ end
 
 
 
-function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::Vector{TF}, ρ; verbose=false) where TF
+#function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::Vector{TF}, ρ::Any; verbose=false) where TF
+function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector, ρ::AbstractVector; verbose=false) 
 
     # Testes de consistência
     no in [1;2]    || error("Tensao_elemento_no_ponto::nó deve ser 1 ou 2") 
@@ -169,9 +174,12 @@ function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::Vector{TF}, ρ; verbose
     σe1 = sqrt( (σ_N+σ_M)^2 + 3*τ^2 + 1E-6^2)
 
     # Aplica relaxação
-    p = 3.0
-    q = q
-    σe = σe1*ρ^(q-p)
+    p = one(eltype(ρ)) * 3.0
+    q = p
+    # Acessa o rho do elemento
+    ρe = ρ[ele]
+    fe = ρe^(p-q)
+    σe = σe1*fe
 
     # Retorna  a tensão equivalente no ele, nó, pto
     return σe 

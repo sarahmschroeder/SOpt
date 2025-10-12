@@ -56,7 +56,7 @@ function main_otim(arquivo,nr=10)
     m = 1
 
     # Penalização inicial
-    r0 = 1.0
+    r0 = 10.0
 
     # μ inicial
     μ = zeros(m)
