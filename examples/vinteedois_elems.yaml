@@ -2,18 +2,17 @@
 
 materiais:
   - nome: "aco"
-    G: 8.0e10             # Módulo de Cisalhamento (Pa)
-    Ex: 2.1e11            # Módulo de Elasticidade (Pa)
-    S_esc: 350e6          # Tensão de Escoamento (Pa) - 350 MPa
-
+    G: 80E9           
+    Ex: 210E9        
+    S_esc: 350e6         
+# r = 0.1
 geometrias:
-  # Seção Circular Sólida: Raio R=0.1m
-  - Iz: 7.8539816e-5      # Momento de Inércia
-    A: 0.0314159265       # Área
-    Iy: 7.8539816e-5
+  - Iz: 5.748E-6    
+    A: 5.304E-3     
+    Iy: 5.748E-6
     nome: "tubo1"
     α: 0
-    J0: 1.57079633e-4     # Constante de Torção
+    J0: 1.149E-5    
 
 coordenadas:
   0.0 0.0 0.0

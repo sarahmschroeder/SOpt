@@ -31,7 +31,7 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     ################################## RESTRIÇÃO DE TENSÃO #############################################
 
     # Alias para calcular a restrição de tensão em função de x 
-    funcaox(x) =  Realiza_gσ(x, malha, forcas, linsolve, σ_Y)
+    funcaox(x) =  Realiza_gσ(x, malha, forcas, linsolve, σ_Y, ρ)
 
     # Dada a distribuição das variáveis de projeto, calcula a 
     # média e a variância da restrição de tensão equivalente 
