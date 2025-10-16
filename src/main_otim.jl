@@ -56,13 +56,13 @@ function main_otim(arquivo,nr=10)
     m = 1
 
     # Penalização inicial
-    r0 = 10.0
+    r0 = 3.0
 
     # μ inicial
     μ = zeros(m)
 
     # Número de desvios para a restrição robusta 
-    β = 3.0
+    β = 0.0
 
     # Dicionarios LFrame
     dados_ele = malha.dados_elementos

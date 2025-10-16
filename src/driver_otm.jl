@@ -47,7 +47,8 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     end
 
     # Lagrangiano aumentado
-    LA = V/V0 + (r0/2)*Heaviside(μ[1]/r0 + gr)^2
+    #LA = V/V0 + (r0/2)*Heaviside(μ[1]/r0 + gr)^2
+    LA = V/V0 + (r0/2)*(μ[1]/r0 + gr)^2
 
     #@show V/V0, (r0/2)*Heaviside(μ[1]/r0 + gr)^2
 
@@ -66,7 +67,8 @@ function Driver(ρ::AbstractVector{T}, bins, r0::Float64, malha::LFrame.Malha, �
     dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ,forcas, linsolve, σ_Y, malha), malha.ne)
 
     # Derivada da função Lagrangiano aumentado
-    dLA = dV./V0 + (r0)*Heaviside(μ[1]/r0 + gr)*(dEgσ + β*dVargσ)
+    #dLA = dV./V0 + (r0)*Heaviside(μ[1]/r0 + gr)*(dEgσ + β*dVargσ)
+    dLA = dV./V0 + (r0)*(μ[1]/r0 + gr)*(dEgσ + β*dVargσ)
 
     # Caso solicitado, retorna a derivada
     if opcao == "dLA"

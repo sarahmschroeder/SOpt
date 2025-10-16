@@ -175,7 +175,7 @@ function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector, ρ::Abs
 
     # Aplica relaxação
     p = one(eltype(ρ)) * 3.0
-    q = p
+    q = one(eltype(ρ)) * 1.0
     # Acessa o rho do elemento
     ρe = ρ[ele]
     fe = ρe^(p-q)
