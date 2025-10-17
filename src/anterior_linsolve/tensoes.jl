@@ -8,11 +8,11 @@
 #
 # Função que faz o cálculo da restrição *aleatória*
 #
-function Realiza_gσ(x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix,  σ_Y, ρ::AbstractVector)
+function Realiza_gσ(x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix, linsolve, σ_Y, ρ::AbstractVector)
 
     # Cálculo da norma das tensões considerando a variável aleatória, o resultado disso vai ser o argumento (de tensão)
     # que vai pro LASS
-    gσ = Calcula_gσ(x,malha,forcas,σ_Y, ρ)
+    gσ = Calcula_gσ(x,malha,forcas,linsolve,σ_Y, ρ)
 
     # Devolve
     return gσ
@@ -24,7 +24,7 @@ end
 #
 # x são as variáveis aleatórias
 # 
-function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix,  σ_Y, ρ::AbstractVector, P=8.0)
+function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix,  linsolve, σ_Y, ρ::AbstractVector, P=8.0)
 
     # Aplica as forças
     aplica_loads!(forcas, x)
@@ -35,8 +35,12 @@ function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMa
     # Monta o vetor de forças 
     F = Monta_FG(forcas,nnos)
 
-    # Soluciona o problema de equilíbrio
-    U = Monta_linsolve(ρ,malha,F)
+    # Modifica o rhs
+    linsolve.b[1:6*malha.nnos] .= F
+
+    # Calcula o deslocamento 
+    sol = LinearSolve.solve!(linsolve)
+    U = sol.u[1:6*malha.nnos]
     
     # Evita zeros em U
     U .+= 1E-12
@@ -50,9 +54,9 @@ function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMa
     # A restrição determinística é
     gd = norma/σ_Y - 1
 
-    # retorna o valor da restrição 
+
     return gd
-   
+    
 
 end
 
@@ -61,13 +65,16 @@ end
 
 
 #function tensao_equivalente(U::Vector{T}, malha, ρ::AbstractVector{T}) where T
-function tensao_equivalente(U::AbstractVector, malha, ρ::AbstractVector{TR}) where {TR} 
-
+function tensao_equivalente(U::AbstractVector{TU}, malha, ρ::AbstractVector{TR}) where {TU, TR} # o codigo nao rodava sem declarar isso aqui (duas genericas)
     # Número de elementos na malha
     ne = malha.ne
 
-    # Loop pelos elementos da malha, calculando as tensões ...
-    σ_eq = zeros(TR, 4*ne) 
+    # Loop pelos elementos da malha, calculando as 
+    # tensões ...
+    #σ_eq = zeros(T,4*ne) #Float64[]
+    # Usa promote_type p ter o tipo generico 
+    Tpromovido = promote_type(TU, TR) 
+    σ_eq = zeros(Tpromovido, 4*ne) 
 
     # Loops por elemento/nó/pto
     cont = 1
@@ -167,8 +174,8 @@ function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector, ρ::Abs
     σe1 = sqrt( (σ_N+σ_M)^2 + 3*τ^2 + 1E-6^2)
 
     # Aplica relaxação
-    p = 3.0 #one(T1) * 3.0
-    q = 2.5 #one(T1) * 2.5
+    p = one(T1) * 3.0
+    q = one(T1) * 2.5
 
     # Acessa o rho do elemento
     ρe = ρ[ele]

@@ -17,7 +17,7 @@ function Driver(ρ::AbstractVector, bins, r0::Float64, malha::LFrame.Malha, μ::
     # Prepara o problema de equilíbrio (sem definir as forças)
     # O linsolve não é modificado ao longo da simulação
     #
-    # linsolve =  Monta_linsolve(ρ, malha)
+    linsolve =  Monta_linsolve(ρ, malha)
 
     ################################### FUNÇÃO OBJETIVO #################################################
 
@@ -30,7 +30,7 @@ function Driver(ρ::AbstractVector, bins, r0::Float64, malha::LFrame.Malha, μ::
     ################################## RESTRIÇÃO DE TENSÃO #############################################
 
     # Alias para calcular a restrição de tensão em função de x 
-    funcaox(x) =  Realiza_gσ(x, malha, forcas, σ_Y, ρ)
+    funcaox(x) =  Realiza_gσ(x, malha, forcas, linsolve, σ_Y, ρ)
 
     # Dada a distribuição das variáveis de projeto, calcula a 
     # média e a variância da restrição de tensão equivalente 
@@ -46,8 +46,9 @@ function Driver(ρ::AbstractVector, bins, r0::Float64, malha::LFrame.Malha, μ::
     end
 
     # Lagrangiano aumentado
-    LA = V/V0 + (r0/2)*Heaviside(μ[1]/r0 + gr)^2
-   
+    #LA = V/V0 + (r0/2)*Heaviside(μ[1]/r0 + gr)^2
+    LA = V/V0 + (r0/2)*(μ[1]/r0 + gr)^2
+
     #@show V/V0, (r0/2)*Heaviside(μ[1]/r0 + gr)^2
 
     # Se solicitado, retorna o LA 
@@ -62,11 +63,12 @@ function Driver(ρ::AbstractVector, bins, r0::Float64, malha::LFrame.Malha, μ::
     dV = Derivada_volume(ne, dicionario_geometrias, dicionario_materiais, L, ρ, dados_elementos )
 
     # Calcula a derivada do valor esperado e da variância em relação ao ρ usando o LASS
-    dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ,forcas, σ_Y, malha), malha.ne)
+    dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ,forcas, linsolve, σ_Y, malha), malha.ne)
 
     # Derivada da função Lagrangiano aumentado
-    dLA = dV./V0 + (r0)*Heaviside(μ[1]/r0 + gr)*(dEgσ + β*dVargσ)
-   
+    #dLA = dV./V0 + (r0)*Heaviside(μ[1]/r0 + gr)*(dEgσ + β*dVargσ)
+    dLA = dV./V0 + (r0)*(μ[1]/r0 + gr)*(dEgσ + β*dVargσ)
+
     # Caso solicitado, retorna a derivada
     if opcao == "dLA"
         return dLA
