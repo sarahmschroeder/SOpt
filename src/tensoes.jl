@@ -54,6 +54,7 @@ function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMa
     # A restrição determinística é
     gd = norma/σ_Y - 1
 
+
     return gd
     
 
@@ -64,16 +65,16 @@ end
 
 
 #function tensao_equivalente(U::Vector{T}, malha, ρ::AbstractVector{T}) where T
-function tensao_equivalente(U::AbstractVector{TU}, malha, ρ::AbstractVector{TR}) where {TU, TR}
+function tensao_equivalente(U::AbstractVector{TU}, malha, ρ::AbstractVector{TR}) where {TU, TR} # o codigo nao rodava sem declarar isso aqui (duas genericas)
     # Número de elementos na malha
     ne = malha.ne
 
     # Loop pelos elementos da malha, calculando as 
     # tensões ...
     #σ_eq = zeros(T,4*ne) #Float64[]
-    # Usa promote_type para obter o tipo mais genérico (será Dual, se TR for Dual)
-    T_out = promote_type(TU, TR) 
-    σ_eq = zeros(T_out, 4*ne) 
+    # Usa promote_type p ter o tipo generico 
+    Tpromovido = promote_type(TU, TR) 
+    σ_eq = zeros(Tpromovido, 4*ne) 
 
 
     # Loops por elemento/nó/pto
@@ -175,7 +176,8 @@ function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector, ρ::Abs
 
     # Aplica relaxação
     p = one(eltype(ρ)) * 3.0
-    q = one(eltype(ρ)) * 1.0
+    q = one(eltype(ρ)) * 0.0
+
     # Acessa o rho do elemento
     ρe = ρ[ele]
     fe = ρe^(p-q)
