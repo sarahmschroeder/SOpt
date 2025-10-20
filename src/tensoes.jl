@@ -20,7 +20,8 @@ function Realiza_gσ(x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMat
 end
 
 #
-# Função que devolve a restrição global de tensão
+# Função que devolve a restrição global de tensão determminística - que vai entrar no LASS para a abordagem
+# estocástica
 #
 # x são as variáveis aleatórias
 # 
@@ -32,22 +33,22 @@ function Calcula_gσ(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMa
     # Número de nós 
     nnos = malha.nnos
 
-    # Monta o vetor de forças 
+    # Monta o vetor de forças - Eq. 5
     F = Monta_FG(forcas,nnos)
 
-    # Soluciona o problema de equilíbrio
+    # Soluciona o problema de equilíbrio - Eq. 5
     U = Monta_linsolve(ρ,malha,F)
     
     # Evita zeros em U
     U .+= 1E-12
     
-    # Calcula tensoes equivalentes
+    # Calcula tensoes equivalentes - Eq. 33
     σe = tensao_equivalente(U, malha, ρ)
 
-    # Calcula norma P
+    # Calcula norma P - uso de acordo com a Eq. 78 na abordagem usada
     norma = norm(σe,P)
 
-    # A restrição determinística é
+    # A restrição determinística é - de acordo com Eq. 83
     gd = norma/σ_Y - 1
 
     # retorna o valor da restrição 
@@ -60,7 +61,7 @@ end
 
 
 
-#function tensao_equivalente(U::Vector{T}, malha, ρ::AbstractVector{T}) where T
+# Função que organiza as tensões de von Mises para cada ponto, nó e elemento em um só vetor
 function tensao_equivalente(U::AbstractVector, malha, ρ::AbstractVector{TR}) where {TR} 
 
     # Número de elementos na malha
@@ -74,7 +75,9 @@ function tensao_equivalente(U::AbstractVector, malha, ρ::AbstractVector{TR}) wh
     for ele=1:ne
        for no=1:2
            for pto=0:1
-               σe =  Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U, ρ)    
+               # Calcula a tensão equivalente de von Mises
+               σe =  Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U, ρ)
+               # Unidade em MPa     
                σ_eq[cont] = σe/1E6 
                cont += 1
             end
@@ -87,7 +90,7 @@ end
 
 
 
-#function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::Vector{TF}, ρ::Any; verbose=false) where TF
+# Função para a tensão equivalente de von Mises, Eq. 33
 function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector, ρ::AbstractVector{T1}; verbose=false) where T1
 
     # Testes de consistência
@@ -146,13 +149,13 @@ function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector, ρ::Abs
 
     # Podemos calcular as componentes de tensão diretamente:
 
-    # Barra
+    # Barra - Eq. 14
     σ_N = N/Ae
 
-    # Eixo
+    # Eixo - Eq. 15
     τ = re*T/J0e
 
-    # Flexão 
+    # Flexão - Eq. 16
     σ_M = ((-1)^pto)*re*Mr/Ize
     
     if verbose 
@@ -163,12 +166,12 @@ function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector, ρ::Abs
     end
 
     # Podemos calcular a tensão equivalente de von-Mises neste
-    # ponto
+    # ponto - Eq. 33
     σe1 = sqrt( (σ_N+σ_M)^2 + 3*τ^2 + 1E-6^2)
 
-    # Aplica relaxação
-    p = 3.0 #one(T1) * 3.0
-    q = 2.5 #one(T1) * 2.5
+    # Aplica relaxação - Seção 4.2
+    p = 3.0
+    q = 2.5 
 
     # Acessa o rho do elemento
     ρe = ρ[ele]

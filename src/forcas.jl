@@ -1,4 +1,9 @@
+################################################################################################################
+#                                ROTINAS PARA A MONTAGEM DO VETOR DE FORÇAS, APLICAÇÃO                         #
+#                              DOS LOADS INCERTOS E REALIZAÇÃO DOS CARREGAMENTOS INCERTOS                      #
+################################################################################################################
 
+# Função para montar o vetor de forças para o elemento de pórtico espacial. Condizente com Eq. 5
 function Monta_FG(forcas::AbstractMatrix{T},nnos::Int64) where T
     
 
@@ -61,7 +66,7 @@ function gera_distribuicoesforcas(forcas::AbstractMatrix{T}, forcas0::AbstractVe
     # Loop pelas magnitudes da malha
     for i in LinearIndices(forcas0)
 
-        # Magnitude original da força
+        # Magnitude original da força 
         media  = forcas0[i]
 
         # Variância da distribuição 
