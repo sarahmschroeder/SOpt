@@ -4,7 +4,7 @@
 function main_otim(arquivo,nr=10)
 
     # Tensão de escoamento 
-    σ_Y = 2.0
+    σ_Y = 50.0
 
     # Define o arquivo
     malha = LFrame.Le_YAML(arquivo)
