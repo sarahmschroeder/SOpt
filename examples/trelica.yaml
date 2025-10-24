@@ -1,4 +1,4 @@
-# Estrutura 2D treliçada com 4 elementos e uma força em -y; r = 3cm = 0,003m
+# Estrutura 2D treliçada com 4 elementos e uma força em -y; r = 2cm = 0,02m
 
 materiais:
   - nome: "aco"
@@ -15,7 +15,7 @@ geometrias:
     Iy: 1.257e-7
     nome: "tubo1"
     α: 0
-    J0: 2.513e-3
+    J0: 2.513e-7
 
 coordenadas:
   0.0 0.0 0.0

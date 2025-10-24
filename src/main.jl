@@ -101,7 +101,7 @@ function Tensao_val_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector; verbos
 
 
     # Retorna  a tensão equivalente 
-    return σe 
+    return (σ_N,τ,σ_M),σe 
 
 end
 
@@ -215,11 +215,10 @@ function main(arquivo,n_r=2)
     # TENSÕES 
     # Numero de elementos
     nele = malha.ne
-    realizacoes = gera_distribuicoesforcas1(malha,n_r)
 
     # Ve o que acontece com as tensoes
     tensoes = distribui_tensoes(malha, realizacoes)
-
+#=
     for i = 1:nele
         if i == 1
             display(histogram(tensoes[i,:]))
@@ -227,6 +226,7 @@ function main(arquivo,n_r=2)
             display(histogram!(tensoes[i,:]))
         end
     end
+    =#
 
 
 
@@ -247,7 +247,7 @@ function main(arquivo,n_r=2)
         for no=1:2
             for pto=0:1
                     println("ELEMENTO $ele, NÓ $no E PONTO $pto:")
-                    Esforcos_internos, (σ_N, τ, σ_M), σ = Tensao_val_elemento_no_ponto(ele,no,pto,malha,U)
+                    (σ_N, τ, σ_M), σ = Tensao_val_elemento_no_ponto(ele,no,pto,malha,U)
 
                     #@show Esforcos_internos, [σ_N;τ;σ_M], σ
                     #println("\n")
