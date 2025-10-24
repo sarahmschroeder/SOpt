@@ -5,7 +5,7 @@ module SOpt
     using LinearSolve
     using Distributions
     using LinearAlgebra
-    using Test
+    #using Test
     using OrderedCollections
     using Lgmsh
     using YAML
@@ -13,10 +13,11 @@ module SOpt
     using LASS
     using ForwardDiff
     using WallE
+    using Plots
 
 
     # Carrega os modulos
-    #include("main.jl")
+    include("validacoes.jl")
     include("main_otim.jl")
     include("driver_otm.jl")
     include("forcas.jl")

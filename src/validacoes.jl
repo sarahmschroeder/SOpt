@@ -19,7 +19,7 @@
 # arquivo <- yaml com os dados da malha
 # n_r     <- número de realizações
 #
-function main(arquivo,n_r=100_000)
+function main(arquivo,n_r=2)
 
     # Define o arquivo
     malha = LFrame.Le_YAML(arquivo)
@@ -68,18 +68,18 @@ function main(arquivo,n_r=100_000)
 
 
     # Soluciona o problema utilizando o LFrame
-    #U, malha = Analise3D(arquivo)# ; ρ0) # deixando o rho pra depois
+    U, malha = Analise3D(arquivo)# ; ρ0) # deixando o rho pra depois
 
     # Mensagem
-    #println("Iniciando o cálculo para validação das tensões presentes na estrutura descrita em $arquivo ...")
+    println("Iniciando o cálculo para validação das tensões presentes na estrutura descrita em $arquivo ...")
 
     # Pré-aloca os vetores
-    #vetor_tensoes = Float64[]
-    #vetor_tensoes_equivalentes = Float64[]
+    vetor_tensoes = Float64[]
+    vetor_tensoes_equivalentes = Float64[]
 
 
     # realiza um looping pelos elementos
-    #=
+    
     for ele=1: (malha.ne)
         for no=1:2
             for pto=0:1
@@ -99,5 +99,5 @@ function main(arquivo,n_r=100_000)
     end
 
     return vetor_tensoes, vetor_tensoes_equivalentes
-  =#
+  
 end

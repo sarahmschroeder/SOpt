@@ -6,7 +6,7 @@ materiais:
     Ex: 2.1e11
     S_esc: 50e6 # ESSE VALOR NAO É USADO, MODIFICAR NO MAIN
     
-loads: 2 2 -4000
+loads: 2 2 -3000
 
 
 geometrias:
