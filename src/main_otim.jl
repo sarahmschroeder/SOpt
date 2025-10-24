@@ -41,7 +41,7 @@ function main_otim(arquivo,nr=10)
     writedlm("realizacoes.txt", realizacoes)
 
     # Número de amostras por variável (força)
-    n_amostras = 5
+    n_amostras = 1
 
     # Forma um vetor com os numeros de bins de cada variavel
     Nb = [n_amostras for i=1:size(realizacoes,1)] 

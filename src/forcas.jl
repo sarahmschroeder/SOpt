@@ -70,7 +70,12 @@ function gera_distribuicoesforcas(forcas::AbstractMatrix{T}, forcas0::AbstractVe
         media  = forcas0[i]
 
         if deterministico
+            # Pequena perturbação numérica para evitar Δ == 0 (LASS precisa de variação entre amostras)
+            # Perturbação relativa muito pequena: não afeta o problema "praticamente determinístico"
+            tol = 1e-12   # sujeirinha numérica 
             realiza[i,:] .= media                # determinístico
+            realiza[i,1] = media - tol
+            realiza[i,2] = media + tol
         else
             # Variância da distribuição 
             variancia = sqrt(abs(σ2*media))      # robusto padrão
