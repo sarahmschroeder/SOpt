@@ -5,7 +5,7 @@ module SOpt
     using LinearSolve
     using Distributions
     using LinearAlgebra
-    #using Test
+    using Test
     using OrderedCollections
     using Lgmsh
     using YAML
@@ -17,7 +17,6 @@ module SOpt
 
 
     # Carrega os modulos
-    include("validacoes.jl")
     include("main_otim.jl")
     include("driver_otm.jl")
     include("forcas.jl")
@@ -25,9 +24,11 @@ module SOpt
     include("volume.jl")
     include("LASS/lass.jl")    
     include("auxiliar.jl")
-    #include("tensao.jl")
+    include("main.jl")
 
-    export main_otim
+
+    #export main_otim
+    export main
 
 
 end 

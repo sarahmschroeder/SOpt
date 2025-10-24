@@ -36,7 +36,7 @@ function Driver(ρ::AbstractVector, bins, r0::Float64, malha::LFrame.Malha, μ::
     # média e a variância da restrição de tensão equivalente 
     # utilizando o LASS
     Egσ, Vargσ = Lass(bins,  x -> funcaox(x))
-
+ 
     # Com isso, a restrição robusta é 
     gr = Egσ + β*Vargσ
 

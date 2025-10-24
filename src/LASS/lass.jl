@@ -25,7 +25,7 @@ end
 #
 # Gera todas as realizações de forças para usar no LASS
 #
-function gera_distribuicoesforcas(malha, n_r=100, σ2=0.4)
+function gera_distribuicoesforcas1(malha, n_r=100; σ2=0.4)
 
     # Número de forças 
     nload = size(malha.loads,1)
@@ -79,8 +79,10 @@ function distribui_tensoes(malha, realizacoes)
         # Calcula a resposta da estrutura
         U,_ = Analise3D(malha,false)
 
+        ρ = ones(malha.ne)
+
         # Calcula as tensões equivalentes pra essa realização
-        σ_eq = tensao_equivalente(U, malha)
+        σ_eq = tensao_equivalente(U, malha, ρ)
 
         # Salva o resultado da tensão dessa realização na matriz
         tensoes[:, j] .= σ_eq
@@ -91,7 +93,7 @@ function distribui_tensoes(malha, realizacoes)
 end
 
 
-function roda_lass(malha,n_r)
+function roda_lass(malha,n_r,ρ)
 
     # Define distribuições das forças 
     dists = gera_distribuicoesforcas(malha,n_r)
@@ -111,7 +113,7 @@ function roda_lass(malha,n_r)
     #@show bins
 
     # Roda LASS
-    E, Var = Lass(bins, x -> Realiza_norma(x, malha))  
+    E, Var = Lass(bins, x -> Realiza_norma(x, malha, ρ))  
 
     println("Esperança da norma: $E")
     println("Variância da norma: $Var")
