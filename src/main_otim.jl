@@ -30,9 +30,12 @@ function main_otim(arquivo,nr=10)
     # Recupera as intensidades originais das forças, conforme informado no yaml
     forcas0 = forcas[:,3]
 
+    # Define o desvio padrão
+    σ2=0.4
+
     # Vamos gerar as realizações para utilizar ao longo da otimização 
     # matriz com nforcas × nr
-    realizacoes = gera_distribuicoesforcas(forcas,forcas0,nr)
+    realizacoes = gera_distribuicoesforcas(forcas,forcas0,nr, σ2)
 
     # Grava as realizações para estudo posterior
     writedlm("realizacoes.txt", realizacoes)
@@ -59,7 +62,7 @@ function main_otim(arquivo,nr=10)
     μ = zeros(m)
 
     # Número de desvios para a restrição robusta 
-    β = 3.0
+    β = 0.0
 
     # Dicionarios LFrame
     dados_ele = malha.dados_elementos
