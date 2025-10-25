@@ -22,9 +22,9 @@ module SOpt
     include("forcas.jl")
     include("tensoeS.jl")
     include("volume.jl")
-    include("LASS/lass.jl")    
+    include("validacao/rotinas_val.jl")    
     include("auxiliar.jl")
-    include("main.jl")
+    include("validacao/main.jl")
 
 
     #export main_otim

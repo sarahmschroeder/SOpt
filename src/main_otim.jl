@@ -31,7 +31,7 @@ function main_otim(arquivo,nr=10)
     forcas0 = forcas[:,3]
 
     # Define o desvio padrão
-    σ2=0.4
+    σ2=0.9
 
     # Vamos gerar as realizações para utilizar ao longo da otimização 
     # matriz com nforcas × nr
