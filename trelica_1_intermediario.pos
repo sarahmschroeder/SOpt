@@ -1,0 +1,27 @@
+$MeshFormat
+2.2 0 8
+$EndMeshFormat
+$Nodes
+3
+1 0.0 0.0 0.0
+2 1.0 0.0 0.0
+3 0.0 1.0 0.0
+$EndNodes
+$Elements
+2
+1 1 0 1 2
+2 1 0 2 3
+$EndElements
+$NodeData
+1
+" Deslocamentos"
+1
+0.0
+3
+0
+3
+3
+1 0.0 0.0 0.0
+2 -3.7854319933121154e-5 -7.355159065598162e-5 0.0
+3 0.0 0.0 0.0
+$EndNodeData

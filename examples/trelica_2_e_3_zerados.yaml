@@ -1,0 +1,43 @@
+# Para estudo de tensões: exemplo da treliça com os elementos 2 e 3 zerados para extração de tensoes 
+
+materiais:
+  - nome: "aco"
+    G: 8.0e10
+    Ex: 2.1e11
+    S_esc: 50e6 # ESSE VALOR NAO É USADO, MODIFICAR NO MAIN
+    
+loads: 2 2 -3000
+
+
+geometrias:
+  - Iz: 1.257e-7
+    A: 1.257e-3
+    Iy: 1.257e-7
+    nome: "tubo1"
+    α: 0
+    J0: 2.513e-7
+
+coordenadas:
+  0.0 0.0 0.0
+  1.0 0.0 0.0
+  0.0 1.0 0.0
+
+conectividades: 
+  1 2
+  2 3
+
+apoios: 
+  1 1 0.0
+  1 2 0.0
+  1 3 0.0
+  1 4 0.0
+  1 5 0.0
+  1 6 0.0
+  3 1 0.0
+  3 2 0.0
+  3 3 0.0
+
+
+dados_elementos:
+  aco tubo1
+  aco tubo1

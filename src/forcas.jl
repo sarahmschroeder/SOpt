@@ -55,7 +55,7 @@ end
 #
 # Gera todas as realizações de forças para usar no LASS
 #
-function gera_distribuicoesforcas(forcas::AbstractMatrix{T}, forcas0::AbstractVector{T}, nr, σ2; deterministico=false) where T
+function gera_distribuicoesforcas(forcas::AbstractMatrix{T}, forcas0::AbstractVector{T}, nr, σ2; deterministico=true) where T
 
     # Número de forças 
     nload = size(forcas,1)
