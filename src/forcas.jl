@@ -3,6 +3,48 @@
 #                              DOS LOADS INCERTOS E REALIZAÇÃO DOS CARREGAMENTOS INCERTOS                      #
 ################################################################################################################
 
+########################################### APLICAÇÃO DAS INCERTEZAS ###########################################
+
+# Função para aplicar esse carregamento desse vetor
+#
+# x é um vetor com as variáveis aleatórias ( magnitude
+# das forças )
+#
+
+# Mudei o tipo de forcas pra aceitar um vetor dentro da matriz
+function aplica_loads!(forcas::AbstractMatrix{Any}, x::AbstractVector{T}, y::AbstractVector{T}) where {T}
+
+
+    # Teste dimensao
+    if size(forcas,1) != length(x)
+        error("Dimensao de malha.loads tem que ser o mesmo de x")
+    end
+
+    # Agora também temos os alphas. Precisamos calcular os cossenos e senos.
+
+    Fx = x .* cos.(y)
+    Fy = x .* sin.(y)
+    Fz = zeros(length(y))
+
+    # Cria uma matriz n×3 com as componentes:
+    F = hcat(Fx, Fy, Fz) # concatenação horizontal, certo? cada linha de F tem as
+    # três componentes da força para os x e y (realização de modulo e angulo) correspondentes
+
+    # Atualiza a matriz 'forcas' pra usar essas componentes:
+    # Forca = Fi[cos(α), sin(α), 0]
+    # Cria os vetores [Fx, Fy, 0] para cada linha
+    for i in 1:length(x)
+        forcas[i, 3] = [Fx[i], Fy[i], Fz[i]]
+    end
+
+    
+end
+
+
+
+
+
+
 ################################################### ÂNGULO ######################################################
 
 function gera_distribuicoesalpha(forcas::AbstractMatrix{T}, α_vec::AbstractVector{T}, nr, σ2; deterministico=true) where T
@@ -79,7 +121,9 @@ end
 #
 # x é um vetor com as variáveis aleatórias ( magnitude
 # das forças )
-#
+
+#= COMENTANDO A FUNÇÃO ORIGINAL PARA NAO PERDER
+
 function aplica_loads!(forcas::AbstractMatrix{T}, x::AbstractVector{T}) where {T}
 
 
@@ -92,6 +136,7 @@ function aplica_loads!(forcas::AbstractMatrix{T}, x::AbstractVector{T}) where {T
     forcas[:,3] .= x
     
 end
+=#
 
 
 #
