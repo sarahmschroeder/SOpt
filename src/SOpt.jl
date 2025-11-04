@@ -27,8 +27,8 @@ module SOpt
     include("validacao/main.jl")
 
 
-    #export main_otim
-    export main
+    export main_otim
+    #export main
 
 
 end 

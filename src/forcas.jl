@@ -3,6 +3,48 @@
 #                              DOS LOADS INCERTOS E REALIZAÇÃO DOS CARREGAMENTOS INCERTOS                      #
 ################################################################################################################
 
+################################################### ÂNGULO ######################################################
+
+function gera_distribuicoesalpha(forcas::AbstractMatrix{T}, α_vec::AbstractVector{T}, nr, σ2; deterministico=true) where T
+
+    # Número de forças 
+    nload = size(forcas,1)
+
+    # Matriz n_load × n_r com as realizações 
+    realiza_alpha = zeros(T,nload,nr)
+    
+    # Loop pelo numero de loads -> cada força vai ter uma distribuição de angulo
+    for i=1:nload
+
+        # Magnitude original do angulo. novamente, considerando que o padrão é zero
+        media  = 0.0
+
+        if deterministico
+            # Pequena perturbação numérica para evitar Δ == 0 (LASS precisa de variação entre amostras)
+            # Perturbação relativa muito pequena: não afeta o problema "praticamente determinístico"
+            tol = 1e-12   # sujeirinha numérica 
+            realiza_alpha[i,:] .= media                # determinístico
+            realiza_alpha[i,1] = media - tol
+            realiza_alpha[i,2] = media + tol
+        else
+            # Variância da distribuição 
+            # (como a media é zero, e eu queria uma variação de +- 30°, coloquei isso direto na variancia)
+            variancia = deg2rad(30.0)
+            # Gera as realizações segundo uma distribuição normal 
+            realiza_alpha[i,:] .= rand(Normal(media, variancia), nr)
+        end
+
+
+    end
+
+    # Retorna a matriz com todas as realizações
+    return realiza_alpha
+
+end
+
+
+################################################### MÓDULO ######################################################
+
 # Função para montar o vetor de forças para o elemento de pórtico espacial. Condizente com Eq. 5
 function Monta_FG(forcas::AbstractMatrix{T},nnos::Int64) where T
     

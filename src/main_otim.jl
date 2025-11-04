@@ -33,12 +33,47 @@ function main_otim(arquivo,nr=10)
     # Define o desvio padrão
     σ2=0.9
 
-    # Vamos gerar as realizações para utilizar ao longo da otimização 
+    # Define o vetor α (vetor para os angulos incertos) (α_vec = [cos(α), sin(α), 0] (das deduções, eq 113),
+    # são 3 posições dentro desse vetor para cada força)
+    α_vec = zeros(3*length(forcas[:,3])) # infere-se que as forças deterministicas vão estar sempre em 0°
+
+    # Gera as realizações de α
+    # matriz com nforcas*3 × nr
+    realizacoes_alpha = gera_distribuicoesalpha(forcas, α_vec, nr, σ2)
+
+    # Grava as realizações para estudo posterior
+    writedlm("realizacoes_alpha.txt", realizacoes_alpha)
+
+    # Montando α_vec:
+    # α_vec = [cos(α), sin(α), 0] (das deduções, eq 113) para cada força
+
+    #= Eu preciso de uma luz aqui: como eu faço isso:
+    j = 1 (contador secundario, o vetor α_vec tem 3 posições para cada força)
+    for i=1:size(forcas,1)
+
+        α_vec[j] = cos(α)
+        α_vec[j+1] = sin(α)
+        α_vec[j+2] = 0.0 (ja estava zerado, só pra mostrar o raciocinio)
+
+        j = j+2
+
+    end
+
+    ... pra cada realização? o que eu pensei em fazer é passar pelas forças armazenando os cossenos e senos dos 
+    angulos, mas os angulos estao em distribuição.... 
+    =#
+
+
+
+
+    # Vamos gerar as realizações das forças para utilizar ao longo da otimização 
     # matriz com nforcas × nr
     realizacoes = gera_distribuicoesforcas(forcas,forcas0,nr, σ2)
 
     # Grava as realizações para estudo posterior
     writedlm("realizacoes.txt", realizacoes)
+
+    # Eu preciso de mais uma luz aqui: é aqui que eu junto as duas incertezas ou so dentro do driver? 
 
     # Número de amostras por variável (força)
     n_amostras = 1
