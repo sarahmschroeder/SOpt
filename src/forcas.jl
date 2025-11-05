@@ -12,7 +12,7 @@
 #
 
 # Mudei o tipo de forcas pra aceitar um vetor dentro da matriz
-function aplica_loads!(forcas::AbstractMatrix{Any}, x::AbstractVector{T}, y::AbstractVector{T}) where {T}
+function aplica_loads!(forcas, x::AbstractVector{T}, y::AbstractVector{T}) where {T}
 
 
     # Teste dimensao
@@ -43,14 +43,14 @@ end
 
 ################################################### ÂNGULO ######################################################
 
-function gera_distribuicoesalpha(forcas::AbstractMatrix{T}, α_vec::AbstractVector{T}, nr, σ3; deterministico=true) where T
+function gera_distribuicoesalpha(forcas, nr, σ3; deterministico=false) 
 
     # Número de forças 
     nload = size(forcas,1)
 
     # Matriz n_load × n_r com as realizações 
-    realiza_alpha = zeros(T,nload,nr)
-    
+    realiza_alpha = zeros(Float64, nload, nr)
+
     # Loop pelo numero de loads -> cada força vai ter uma distribuição de angulo
     for i=1:nload
 
@@ -88,7 +88,7 @@ function Monta_FG(forcas::AbstractMatrix{T},nnos::Int64) where T
     
 
     # Aloca o vetor global
-    FG = zeros(T,6*nnos)
+    FG = zeros(Float64,6*nnos)
 
     # Loop pelas informações dos carregamentos concentrados
     for i in axes(forcas,1)
@@ -105,8 +105,15 @@ function Monta_FG(forcas::AbstractMatrix{T},nnos::Int64) where T
         # O grau de liberdade global
         glg = 6*(no-1)+gl
 
+        # Se a força for um vetor [Fx, Fy, Fz], usa o componente correto
+        if isa(valor, AbstractVector)
+            FG[glg] += valor[gl]
+        else
+            FG[glg] += valor
+        end
+
         # Sobrepoe no gl
-        FG[glg] = FG[glg] + valor
+        #FG[glg] = FG[glg] + valor
     end
 
     # Retorna o vetor
@@ -118,33 +125,18 @@ end
 # x é um vetor com as variáveis aleatórias ( magnitude
 # das forças )
 
-#= COMENTANDO A FUNÇÃO ORIGINAL PARA NAO PERDER
-
-function aplica_loads!(forcas::AbstractMatrix{T}, x::AbstractVector{T}) where {T}
-
-
-    # Teste dimensao
-    if size(forcas,1) != length(x)
-        error("Dimensao de malha.loads tem que ser o mesmo de x")
-    end
-
-    # Aplica os carregamentos com os valores do vetor x
-    forcas[:,3] .= x
-    
-end
-=#
 
 
 #
 # Gera todas as realizações de forças para usar no LASS
 #
-function gera_distribuicoesforcas(forcas::AbstractMatrix{T}, forcas0::AbstractVector{T}, nr, σ2; deterministico=true) where T
+function gera_distribuicoesforcas(forcas::AbstractMatrix{T}, forcas0::AbstractVector{T}, nr, σ2; deterministico=false) where T
 
     # Número de forças 
     nload = size(forcas,1)
 
     # Matriz n_load × n_r com as realizações 
-    realiza = zeros(T,nload,nr)
+    realiza = zeros(Float64,nload,nr)
     
     # Loop pelas magnitudes da malha
     for i in LinearIndices(forcas0)
@@ -173,3 +165,19 @@ function gera_distribuicoesforcas(forcas::AbstractMatrix{T}, forcas0::AbstractVe
     return realiza
 
 end
+
+#= COMENTANDO A FUNÇÃO ORIGINAL PARA NAO PERDER
+
+function aplica_loads!(forcas::AbstractMatrix{T}, x::AbstractVector{T}) where {T}
+
+
+    # Teste dimensao
+    if size(forcas,1) != length(x)
+        error("Dimensao de malha.loads tem que ser o mesmo de x")
+    end
+
+    # Aplica os carregamentos com os valores do vetor x
+    forcas[:,3] .= x
+    
+end
+=#

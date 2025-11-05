@@ -8,7 +8,7 @@
 #
 # Função que faz o cálculo da restrição *aleatória*
 #
-function Realiza_gσ(x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix,  σ_Y, ρ::AbstractVector)
+function Realiza_gσ(x::AbstractVector, y::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix,  σ_Y, ρ::AbstractVector)
 
     # Cálculo da norma das tensões considerando a variável aleatória, o resultado disso vai ser o argumento (de tensão)
     # que vai pro LASS
@@ -25,7 +25,7 @@ end
 #
 # x são as variáveis aleatórias
 # 
-function Calcula_gσ(x::AbstractVector, y::AbstractVector malha::LFrame.Malha, forcas::AbstractMatrix,  σ_Y, ρ::AbstractVector, P=8.0)
+function Calcula_gσ(x::AbstractVector, y::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix,  σ_Y, ρ::AbstractVector, P=8.0)
 
     # Aplica as forças
     aplica_loads!(forcas, x, y)

@@ -31,10 +31,17 @@ end
 
 
 # Derivada em relação ao ρ (otimização) para um x fixo
-function derivada(x,ρ0,forcas, σ_Y, malha)
+function derivada(z,ρ0,forcas, σ_Y, malha)
+
+    # XUNXO: redividindo o z em x e y
+    # Divide o z nas duas partes, porque o laaaa dentro do realiza e do calcula gsigma tem o aplica_loads! que 
+    # vai precisar de x e y
+    n = length(z) ÷ 2
+    x = z[1:n]
+    y = z[n+1:end]
 
     # Substitui o valor de x 
-    funcaoρ(ρ) =  Realiza_gσ(x, malha, forcas,  σ_Y, ρ)
+    funcaoρ(ρ) =  Realiza_gσ(x, y, malha, forcas,  σ_Y, ρ)
 
     # Calcula a derivada
     ForwardDiff.gradient(funcaoρ,ρ0)

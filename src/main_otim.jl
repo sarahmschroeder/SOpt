@@ -24,6 +24,8 @@ function main_otim(arquivo,nr=10)
     # para a malha
     forcas = malha.loads
 
+    forcas = Array{Any}(forcas)
+
     # Comprimento
     L = malha.L
 
@@ -42,7 +44,7 @@ function main_otim(arquivo,nr=10)
 
     # Gera as realizações de α
     # matriz com nforcas*3 × nr
-    realizacoes_alpha = gera_distribuicoesalpha(forcas, α_vec, nr, σ2)
+    realizacoes_alpha = gera_distribuicoesalpha(forcas, nr, σ3)
 
     # Grava as realizações para estudo posterior
     writedlm("realizacoes_alpha.txt", realizacoes_alpha)
@@ -87,7 +89,7 @@ function main_otim(arquivo,nr=10)
     μ = zeros(m)
 
     # Número de desvios para a restrição robusta 
-    β = 0.0
+    β = 3.0
 
     # Dicionarios LFrame
     dados_ele = malha.dados_elementos

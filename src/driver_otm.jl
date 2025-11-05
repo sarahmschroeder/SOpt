@@ -34,7 +34,8 @@ function Driver(ρ::AbstractVector, bins, r0::Float64, malha::LFrame.Malha, μ::
 
     funcaoxy(z) = begin
         # divide o vetor z em duas metades - o numero de realizações foi igual pras duas variaveis
-        n = length(z) / 2 
+        n = length(z) ÷ 2
+        
 
         # magnitudes
         x = z[1:n]         
@@ -48,9 +49,12 @@ function Driver(ρ::AbstractVector, bins, r0::Float64, malha::LFrame.Malha, μ::
     # média e a variância da restrição de tensão equivalente 
     # utilizando o LASS
     Egσ, Vargσ = Lass(bins,  z -> funcaoxy(z))
+
  
     # Com isso, a restrição robusta é 
     gr = Egσ + β*Vargσ
+
+    @show Egσ, Vargσ, gr
 
     # Se solicitado, devolve a restrição 
     if opcao == "gσ"
@@ -74,7 +78,7 @@ function Driver(ρ::AbstractVector, bins, r0::Float64, malha::LFrame.Malha, μ::
     dV = Derivada_volume(ne, dicionario_geometrias, dicionario_materiais, L, ρ, dados_elementos )
 
     # Calcula a derivada do valor esperado e da variância em relação ao ρ usando o LASS
-    dEgσ, dVargσ = dLass(bins,  x-> funcaox(x), x -> derivada(x,ρ,forcas, σ_Y, malha), malha.ne)
+    dEgσ, dVargσ = dLass(bins,  z-> funcaoxy(z), z -> derivada(z,ρ,forcas, σ_Y, malha), malha.ne)
 
     # Derivada da função Lagrangiano aumentado
     dLA = dV./V0 + (r0)*Heaviside(μ[1]/r0 + gr)*(dEgσ + β*dVargσ)

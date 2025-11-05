@@ -28,7 +28,7 @@ module SOpt
 
 
     export main_otim
-    #export main
+    export main
 
 
 end 
