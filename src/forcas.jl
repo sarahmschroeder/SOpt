@@ -41,13 +41,9 @@ function aplica_loads!(forcas::AbstractMatrix{Any}, x::AbstractVector{T}, y::Abs
 end
 
 
-
-
-
-
 ################################################### ÂNGULO ######################################################
 
-function gera_distribuicoesalpha(forcas::AbstractMatrix{T}, α_vec::AbstractVector{T}, nr, σ2; deterministico=true) where T
+function gera_distribuicoesalpha(forcas::AbstractMatrix{T}, α_vec::AbstractVector{T}, nr, σ3; deterministico=true) where T
 
     # Número de forças 
     nload = size(forcas,1)
@@ -71,7 +67,7 @@ function gera_distribuicoesalpha(forcas::AbstractMatrix{T}, α_vec::AbstractVect
         else
             # Variância da distribuição 
             # (como a media é zero, e eu queria uma variação de +- 30°, coloquei isso direto na variancia)
-            variancia = deg2rad(30.0)
+            variancia = sqrt(abs(σ3))
             # Gera as realizações segundo uma distribuição normal 
             realiza_alpha[i,:] .= rand(Normal(media, variancia), nr)
         end

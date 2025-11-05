@@ -30,8 +30,11 @@ function main_otim(arquivo,nr=10)
     # Recupera as intensidades originais das forças, conforme informado no yaml
     forcas0 = forcas[:,3]
 
-    # Define o desvio padrão
+    # Define o desvio padrão da força
     σ2=0.9
+
+    # Define o desvio padrão do angulo
+    σ3 = deg2rad(30)
 
     # Define o vetor α (vetor para os angulos incertos) (α_vec = [cos(α), sin(α), 0] (das deduções, eq 113),
     # são 3 posições dentro desse vetor para cada força)
@@ -55,16 +58,26 @@ function main_otim(arquivo,nr=10)
     # Número de amostras por variável (força)
     n_amostras = 1
 
+    # Junta as magnitudes e os ângulos em uma só matriz
+    realizacoes_total = vcat(realizacoes, realizacoes_alpha)
+
+    # Gera os bins combinados
+    Nb_total = [n_amostras for i=1:size(realizacoes_total,1)]
+    bins = Generate_bins(realizacoes_total, Nb_total)
+
+
+    #######################
     # Forma um vetor com os numeros de bins de cada variavel
-    Nb = [n_amostras for i=1:size(realizacoes,1)] 
+    #Nb = [n_amostras for i=1:size(realizacoes,1)] 
     
     # Gera bins
-    bins = Generate_bins(realizacoes, Nb)
+    #bins = Generate_bins(realizacoes, Nb)
+    #######################
 
     # Número de iterações do procedimento de otimização
     niter = 5
 
-    # Número de restrições
+    # Número de restrições 
     m = 1
 
     # Penalização inicial

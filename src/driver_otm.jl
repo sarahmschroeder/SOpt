@@ -30,12 +30,24 @@ function Driver(ρ::AbstractVector, bins, r0::Float64, malha::LFrame.Malha, μ::
     ################################## RESTRIÇÃO DE TENSÃO #############################################
 
     # Alias para calcular a restrição de tensão em função de x 
-    funcaox(x) =  Realiza_gσ(x, malha, forcas, σ_Y, ρ)
+    #funcaox(x) =  Realiza_gσ(x, malha, forcas, σ_Y, ρ)
+
+    funcaoxy(z) = begin
+        # divide o vetor z em duas metades - o numero de realizações foi igual pras duas variaveis
+        n = length(z) / 2 
+
+        # magnitudes
+        x = z[1:n]         
+
+        # ângulos
+        y = z[n+1:end]    
+        Realiza_gσ(x, y, malha, forcas, σ_Y, ρ)
+    end
 
     # Dada a distribuição das variáveis de projeto, calcula a 
     # média e a variância da restrição de tensão equivalente 
     # utilizando o LASS
-    Egσ, Vargσ = Lass(bins,  x -> funcaox(x))
+    Egσ, Vargσ = Lass(bins,  z -> funcaox(z))
  
     # Com isso, a restrição robusta é 
     gr = Egσ + β*Vargσ
