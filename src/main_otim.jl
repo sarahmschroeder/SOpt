@@ -24,7 +24,8 @@ function main_otim(arquivo,nr=10)
     # para a malha
     forcas = malha.loads
 
-    forcas = Array{Any}(forcas)
+    # Nload
+    nload = size(forcas,1)
 
     # Comprimento
     L = malha.L
@@ -37,18 +38,12 @@ function main_otim(arquivo,nr=10)
 
     # Define o desvio padrão do angulo
     σ3 = deg2rad(30)
-
-    # Define o vetor α (vetor para os angulos incertos) (α_vec = [cos(α), sin(α), 0] (das deduções, eq 113),
-    # são 3 posições dentro desse vetor para cada força)
-    α_vec = zeros(3*length(forcas[:,3])) # infere-se que as forças deterministicas vão estar sempre em 0°
-
+    
     # Gera as realizações de α
-    # matriz com nforcas*3 × nr
     realizacoes_alpha = gera_distribuicoesalpha(forcas, nr, σ3)
 
     # Grava as realizações para estudo posterior
     writedlm("realizacoes_alpha.txt", realizacoes_alpha)
-
 
     # Vamos gerar as realizações das forças para utilizar ao longo da otimização 
     # matriz com nforcas × nr
@@ -58,13 +53,19 @@ function main_otim(arquivo,nr=10)
     writedlm("realizacoes.txt", realizacoes)
 
     # Número de amostras por variável (força)
-    n_amostras = 1
+    n_amostras = 5
 
     # Junta as magnitudes e os ângulos em uma só matriz
+    #
+    # Agora temos 2*nload linhas e nr colunas. A sequência 
+    # é primeiro as nload amplitudes e depois os nload 
+    # ângulos
+    #
     realizacoes_total = vcat(realizacoes, realizacoes_alpha)
 
     # Gera os bins combinados
-    Nb_total = [n_amostras for i=1:size(realizacoes_total,1)]
+    Nb_total = n_amostras*ones(Int64,2*nload) #[n_amostras for i=1:size(realizacoes_total,1)]
+
     bins = Generate_bins(realizacoes_total, Nb_total)
 
 

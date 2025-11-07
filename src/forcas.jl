@@ -8,35 +8,74 @@
 # Função para aplicar esse carregamento desse vetor
 #
 # x é um vetor com as variáveis aleatórias ( magnitude
-# das forças )
+# das forças e ângulo) da realização atual 
 #
+function aplica_loads(forcas, x::AbstractVector{T}) where {T}
 
-# Mudei o tipo de forcas pra aceitar um vetor dentro da matriz
-function aplica_loads!(forcas, x::AbstractVector{T}, y::AbstractVector{T}) where {T}
-
-
+    # Numero original de forças
+    nload = size(forcas,1)
+    
     # Teste dimensao
-    if size(forcas,1) != length(x)
-        error("Dimensao de malha.loads tem que ser o mesmo de x")
+    if 2*nload != length(x)
+        error("Verificar dimensões")
     end
 
-    # Agora também temos os alphas. Precisamos calcular os cossenos e senos.
+    # Aloca uma nova matriz de forcas
+    forcas2 = zeros(2*nload,3)
 
-    Fx = x .* cos.(y)
-    Fy = x .* sin.(y)
-    Fz = zeros(length(y))
+    # Loop por informação original 
+    contador = 0
+    for i=1:nload
 
-    # Cria uma matriz n×3 com as componentes:
-    F = hcat(Fx, Fy, Fz) # concatenação horizontal, certo? cada linha de F tem as
-    # três componentes da força para os x e y (realização de modulo e angulo) correspondentes
+        # Ponteiro para o ângulo 
+        pα = nload + i
 
-    # Atualiza a matriz 'forcas' pra usar essas componentes:
-    # Forca = Fi[cos(α), sin(α), 0]
-    # Cria os vetores [Fx, Fy, 0] para cada linha
-    for i in 1:length(x)
-        forcas[i, 3] = [Fx[i], Fy[i], Fz[i]]
+        # Nó da força 
+        no = forcas[i,1]
+
+        # gl original 
+        gl = forcas[i,2]
+
+        # Caso o gl seja Y
+        if gl==2
+
+            # Componente y 
+            fy = x[i]*cosd(x[pα])
+
+            # Componente x
+            fx = x[i]*sind(x[pα])
+
+        # Caso seja em X    
+        elseif gl==1
+
+            # Componente y 
+            fy = x[i]*sind(x[pα])
+
+            # Componente x
+            fx = x[i]*cosd(x[pα])
+
+        else
+
+            error("aplica_loads!:: implementar para z")
+
+        end
+
+        # Incrementa o contador 
+        contador += 1
+
+        # Grava uma linha para a dir x
+        forcas2[contador,:] = [no 1 fx]
+
+        # Incrementa o contador 
+        contador += 1
+
+        # Grava uma linha para a dir y
+        forcas2[contador,:] = [no 2 fy]
+
     end
-
+    
+    # Retorna uma nova matriz de forças, com o dobro de linhas 
+    return forcas2
     
 end
 
@@ -66,8 +105,8 @@ function gera_distribuicoesalpha(forcas, nr, σ3; deterministico=false)
             realiza_alpha[i,2] = media + tol
         else
             # Variância da distribuição 
-            # (como a media é zero, e eu queria uma variação de +- 30°, coloquei isso direto na variancia)
             variancia = sqrt(abs(σ3))
+            
             # Gera as realizações segundo uma distribuição normal 
             realiza_alpha[i,:] .= rand(Normal(media, variancia), nr)
         end
@@ -154,6 +193,7 @@ function gera_distribuicoesforcas(forcas::AbstractMatrix{T}, forcas0::AbstractVe
         else
             # Variância da distribuição 
             variancia = sqrt(abs(σ2*media))      # robusto padrão
+
             # Gera as realizações segundo uma distribuição normal 
             realiza[i,:] .= rand(Normal(media, variancia), nr)
         end
