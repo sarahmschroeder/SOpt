@@ -69,14 +69,6 @@ function main_otim(arquivo,nr=10)
     bins = Generate_bins(realizacoes_total, Nb_total)
 
 
-    #######################
-    # Forma um vetor com os numeros de bins de cada variavel
-    #Nb = [n_amostras for i=1:size(realizacoes,1)] 
-    
-    # Gera bins
-    #bins = Generate_bins(realizacoes, Nb)
-    #######################
-
     # Número de iterações do procedimento de otimização
     niter = 5
 
@@ -90,7 +82,7 @@ function main_otim(arquivo,nr=10)
     μ = zeros(m)
 
     # Número de desvios para a restrição robusta 
-    β = 3.0
+    β = 0.0
 
     # Dicionarios LFrame
     dados_ele = malha.dados_elementos

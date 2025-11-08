@@ -153,17 +153,14 @@ function gera_distribuicoesforcas1(malha, n_r=100; σ2=0.4)
 
 end
 
-
-
-
 # Função que ve o efeito das incertezas nas forças nas tensões
-function distribui_tensoes(malha, realizacoes)
+function distribui_tensoes(malha, realizacoes_tot)
 
     # numero de elementos
     nele = malha.ne
 
     # Número de realizações
-    n_r = size(realizacoes, 2)
+    n_r = size(realizacoes_tot, 2)
 
     # Gera um vetor que guarda essas informações
     #
@@ -174,19 +171,65 @@ function distribui_tensoes(malha, realizacoes)
     # Pega os pares (nó, gdl) da malha — onde aplicar cada força
     # locais = [(linha[1], linha[2]) for linha in eachrow(malha.loads)]
 
-    #@show locais 
+    #@show locais
+
+    forcas = malha.loads
+
+    # Numero original de forças
+    nload = size(forcas,1)
 
     # Loop por cada realização de forças (cada vetor x)
     for j in 1:n_r
 
-        # Aplica a realização j das forças
-        for i in size(malha.loads,1) 
-            valor_forca = realizacoes[i, j]
-            malha.loads[i,3] = valor_forca
+        forcas2 = zeros(2*nload, 3)
+        contador = 0
+
+        for i=1:nload
+            no = forcas[i,1]
+            gl = forcas[i,2]
+            pα = nload + i
+
+            if gl==2
+                    fy = realizacoes_tot[i,j]*cosd(realizacoes_tot[pα,j])
+                    fx = realizacoes_tot[i,j]*sind(realizacoes_tot[pα,j])
+                elseif gl==1
+                    fy = realizacoes_tot[i,j]*sind(realizacoes_tot[pα,j])
+                    fx = realizacoes_tot[i,j]*cosd(realizacoes_tot[pα,j])
+                else
+                    error("aplica_loads!:: implementar para z")
+            end
+
+            contador += 1
+            forcas2[contador,:] = [no 1 fx]
+            contador += 1
+            forcas2[contador,:] = [no 2 fy]
+            #= Aplica a realização j das forças
+            for i in size(malha.loads,1) 
+                valor_forca = realizacoes_tot[i, j]
+                malha.loads[i,3] = valor_forca
+            end
+            =#
         end
-        
+
+        # cria uma cópia da malha com as novas forças (eu não consegui fazer a alteração direto em malha.loads)
+        malha_local = LFrame.Malha(
+                                    malha.ne,
+                                    malha.nnos,
+                                    malha.coord,
+                                    malha.conect,
+                                    malha.apoios,
+                                    malha.dicionario_materiais,
+                                    malha.dicionario_geometrias,
+                                    malha.dados_elementos,
+                                    forcas2,  #  CAMPO MODIFICADO
+                                    malha.mpc,
+                                    malha.floads,
+                                    malha.L,
+                                    malha.nome_arquivo
+                                )
+
         # Calcula a resposta da estrutura
-        U,_ = Analise3D(malha,false)
+        U,_ = Analise3D(malha_local,false)
 
         ρ = ones(malha.ne)
 

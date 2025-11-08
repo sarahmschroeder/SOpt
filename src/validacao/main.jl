@@ -69,8 +69,6 @@ function main(arquivo,n_r=200)
     
     # Agora, vamos fazer os histogramas com as distribuições
 
-    # Para gerar as distribuições das forças vamos usar exatamente o mesmo trecho do main_otim...
-
     # Copia das informações sobre forças concentradas 
     # para podermos utilizazar uma estrutura não mutável 
     # para a malha
@@ -82,6 +80,15 @@ function main(arquivo,n_r=200)
     # Recupera as intensidades originais das forças, conforme informado no yaml
     forcas0 = forcas[:,3]
 
+    # Define o desvio padrão do angulo
+    σ3 = deg2rad(30)
+    
+    # Gera as realizações de α
+    realizacoes_alpha = gera_distribuicoesalpha(forcas, n_r, σ3)
+
+    # Grava as realizações para estudo posterior
+    writedlm("realizacoes_alpha.txt", realizacoes_alpha)
+
     # Define o desvio padrão
     σ2=0.9
 
@@ -92,43 +99,55 @@ function main(arquivo,n_r=200)
     # Grava as realizações para estudo posterior
     writedlm("realizacoes.txt", realizacoes)
 
-    #... até aqui
-
-
-
-    # Plotagem dos resultados
+    ############ Plots das forças e angulos:
     # Número de forças 
     nload = size(malha.loads,1)
 
     # FORÇAS
     xf = readdlm("realizacoes.txt")
 
-    p = plot()
+    p = plot(title = "Distribuição das Forças", xlabel = "Valor da força", ylabel = "Frequência")
 
    for i = 1:nload
-     histogram!(p, xf[i,:])
+     histogram!(p, xf[i,:], label = "Carregamento $i")
     end
 
     display(p)
 
-    #savefig("histograma_forca.pdf")
+    savefig("histograma_forca.pdf")
+
+    # angulos
+    xα = readdlm("realizacoes_alpha.txt")
+
+    p1 = plot(title = "Distribuição das Ângulos", xlabel = "Valor do ângulo", ylabel = "Frequência")
+
+    for i = 1:nload
+     histogram!(p, xα[i,:], label = "Ângulo do carregamento $i")
+    end
+
+    savefig("histograma_alpha.pdf")
+
+    ###############
 
     # TENSÕES 
     # Numero de elementos
     nele = malha.ne
 
-    # Ve o que acontece com as tensoes
-    tensoes = distribui_tensoes(malha, realizacoes)
+    realizacoes_tot = vcat(realizacoes, realizacoes_alpha)
 
-    p2 = plot()
+
+    # Ve o que acontece com as tensoes
+    tensoes = distribui_tensoes(malha, realizacoes_tot)
+
+    p2 = plot(title = "Distribuição das Tensões", xlabel = "Tensão [Pa]", ylabel = "Frequência")
 
    for i = 1:nele
-        histogram!(p2, tensoes[i,:])
+        histogram!(p2, tensoes[i,:], label = "Elemento $i")
     end
 
     display(p2)
 
-    #savefig("histograma_tensao.pdf")
+    savefig("histograma_tensao.pdf")
     
     return vetor_tensoes, vetor_tensoes_equivalentes
   
