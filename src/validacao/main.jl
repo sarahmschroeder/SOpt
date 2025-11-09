@@ -81,7 +81,7 @@ function main(arquivo,n_r=200)
     forcas0 = forcas[:,3]
 
     # Define o desvio padrão do angulo
-    σ3 = deg2rad(30)
+    σ3 = 30
     
     # Gera as realizações de α
     realizacoes_alpha = gera_distribuicoesalpha(forcas, n_r, σ3)
@@ -89,7 +89,7 @@ function main(arquivo,n_r=200)
     # Grava as realizações para estudo posterior
     writedlm("realizacoes_alpha.txt", realizacoes_alpha)
 
-    # Define o desvio padrão
+    # Define o desvio padrão da força
     σ2=0.9
 
     # Vamos gerar as realizações para utilizar ao longo da otimização 
@@ -106,7 +106,7 @@ function main(arquivo,n_r=200)
     # FORÇAS
     xf = readdlm("realizacoes.txt")
 
-    p = plot(title = "Distribuição das Forças", xlabel = "Valor da força", ylabel = "Frequência")
+    p = plot(title = "Distribuição das Forças", xlabel = "Valor da força [N]", ylabel = "Frequência")
 
    for i = 1:nload
      histogram!(p, xf[i,:], label = "Carregamento $i")
@@ -114,18 +114,18 @@ function main(arquivo,n_r=200)
 
     display(p)
 
-    savefig("histograma_forca.pdf")
+    savefig("figuras/histograma_forca.pdf")
 
     # angulos
     xα = readdlm("realizacoes_alpha.txt")
 
-    p1 = plot(title = "Distribuição das Ângulos", xlabel = "Valor do ângulo", ylabel = "Frequência")
+    p1 = plot(title = "Distribuição dos Ângulos", xlabel = "Valor do ângulo [°]", ylabel = "Frequência")
 
     for i = 1:nload
-     histogram!(p, xα[i,:], label = "Ângulo do carregamento $i")
+     histogram!(p1, xα[i,:], label = "Ângulo do carregamento $i")
     end
 
-    savefig("histograma_alpha.pdf")
+    savefig("figuras/histograma_alpha.pdf")
 
     ###############
 
@@ -139,7 +139,7 @@ function main(arquivo,n_r=200)
     # Ve o que acontece com as tensoes
     tensoes = distribui_tensoes(malha, realizacoes_tot)
 
-    p2 = plot(title = "Distribuição das Tensões", xlabel = "Tensão [Pa]", ylabel = "Frequência")
+    p2 = plot(title = "Distribuição das Tensões", xlabel = "Tensão [MPa]", ylabel = "Frequência")
 
    for i = 1:nele
         histogram!(p2, tensoes[i,:], label = "Elemento $i")
@@ -147,7 +147,7 @@ function main(arquivo,n_r=200)
 
     display(p2)
 
-    savefig("histograma_tensao.pdf")
+    savefig("figuras/histograma_tensao.pdf")
     
     return vetor_tensoes, vetor_tensoes_equivalentes
   

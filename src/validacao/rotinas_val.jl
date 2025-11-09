@@ -231,10 +231,10 @@ function distribui_tensoes(malha, realizacoes_tot)
         # Calcula a resposta da estrutura
         U,_ = Analise3D(malha_local,false)
 
-        ρ = ones(malha.ne)
+        ρ = ones(malha_local.ne)
 
         # Calcula as tensões equivalentes pra essa realização
-        σ_eq = tensao_equivalente(U, malha, ρ)
+        σ_eq = tensao_equivalente(U, malha_local, ρ)
 
         # Salva o resultado da tensão dessa realização na matriz
         tensoes[:, j] .= σ_eq
