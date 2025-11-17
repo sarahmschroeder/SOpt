@@ -2,9 +2,31 @@
 #                                  ROTINAS PARA O MAIN DE VALIDACAO                           #
 ###############################################################################################
 
+# Função que organiza as tensões de von Mises para cada ponto, nó e elemento em um só vetor
+
+function tensao_equivalenteval(U::AbstractVector, malha)
+    ne = malha.ne
+    σ_eq = zeros(4*ne)
+
+    cont = 1
+    for ele = 1:ne
+        for no = 1:2
+            for pto = 0:1
+                
+                _,σe = Tensao_val_elemento_no_ponto(ele, no, pto, malha, U; verbose=false)
+                σ_eq[cont] = σe/1e6    # -> MPa
+                cont += 1
+            end
+        end
+    end
+
+    return σ_eq
+end
+
+
 
 # Função para tensao de VM PARA VALIDAÇÃO - aqui nao tem relaxação
-function Tensao_val_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector; verbose=true)
+function Tensao_val_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector; verbose=false)
 
     # Testes de consistência
     no in [1;2]    || error("Tensao_elemento_no_ponto::nó deve ser 1 ou 2") 
@@ -84,117 +106,54 @@ function Tensao_val_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector; verbos
 
 
     # Retorna  a tensão equivalente 
-    return (σ_N,τ,σ_M),σe 
+    return (σ_N, τ, σ_M),σe 
 
 end
 
-
-function Realiza_norma(x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix, ρ::AbstractVector)
-
-    # Cálculo da norma das tensões considerando a variável aleatória, o resultado disso vai ser o argumento (de tensão)
-    # que vai pro LASS
-    σ = Calcula_norma(x,malha,forcas, ρ)
-
-    # Devolve
-    return σ
-    
-end
-
-function Calcula_norma(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix, ρ::AbstractVector, P=8.0)
-
-    # Aplica as forças
-    aplica_loads!(forcas, x)
-
-    # Número de nós 
-    nnos = malha.nnos
-
-    # Monta o vetor de forças - Eq. 5
-    F = Monta_FG(forcas,nnos)
-
-    # Soluciona o problema de equilíbrio - Eq. 5
-    U = Monta_linsolve(ρ,malha,F)
-    
-    # Evita zeros em U
-    U .+= 1E-12
-    
-    # Calcula tensoes equivalentes - Eq. 33
-    σe = tensao_equivalente(U, malha, ρ)
-
-    # Calcula norma P - uso de acordo com a Eq. 78 na abordagem usada
-    norma = norm(σe,P)
-
-    # retorna o valor da restrição 
-    return norma
-   
-
-end
-
-#
-# Gera todas as realizações de forças para usar no LASS
-#
-function gera_distribuicoesforcas1(malha, n_r=100; σ2=0.4)
-
-    # Número de forças 
-    nload = size(malha.loads,1)
-
-    # Matriz n_load × n_r com as realizações 
-    realiza = zeros(nload,n_r)
-    
-    # Loop pelas magnitudes da malha
-    for i = 1:nload
-        magn  = malha.loads[i,3]
-        media = magn               # média é a magnitude que tá na malha
-        desvio = sqrt(abs(σ2*media))         # como definir e onde?     
-        realiza[i,:] .= rand(Normal(media, desvio),n_r) 
-    end
-
-    # Retorna a matriz com todas as realizações
-    return realiza
-
-end
 
 # Função que ve o efeito das incertezas nas forças nas tensões
-function distribui_tensoes(malha, realizacoes_tot)
+#function distribui_tensoes(malha, realizacoes_tot)
+function distribui_tensoes(malha, realizacoes)
 
     # numero de elementos
     nele = malha.ne
 
-    # Número de realizações
-    n_r = size(realizacoes_tot, 2)
+    malha_local = deepcopy(malha)
 
-    # Gera um vetor que guarda essas informações
+    # Número de realizações
+    #n_r = size(realizacoes_tot, 2)
+    n_r = size(realizacoes, 2)
+
+    # Gera uma matriz que guarda essas informações
     #
     # Eu entendo que aqui são as tensões equivalentes (escalar)
     #
     tensoes = zeros(4*nele, n_r) 
 
-    # Pega os pares (nó, gdl) da malha — onde aplicar cada força
-    # locais = [(linha[1], linha[2]) for linha in eachrow(malha.loads)]
-
-    #@show locais
-
-    forcas = malha.loads
+    forcas = malha.loads # matriz de forças originais
 
     # Numero original de forças
     nload = size(forcas,1)
 
-    # Loop por cada realização de forças (cada vetor x)
+    # Loop por cada realização de forças 
     for j in 1:n_r
 
         forcas2 = zeros(2*nload, 3)
         contador = 0
 
         for i=1:nload
+
+            ############ COMENTADO PORQUE USA O ANGULO, ESTOU DEBUGANDO SO A MAGN
             no = forcas[i,1]
             gl = forcas[i,2]
             pα = nload + i
 
             if gl==2
-                    fy = realizacoes_tot[i,j]*cosd(realizacoes_tot[pα,j])
-                    fx = realizacoes_tot[i,j]*sind(realizacoes_tot[pα,j])
+                    fy = realizacoes[i,j]*cosd(realizacoes[pα,j])
+                    fx = realizacoes[i,j]*sind(realizacoes[pα,j])
                 elseif gl==1
-                    fy = realizacoes_tot[i,j]*sind(realizacoes_tot[pα,j])
-                    fx = realizacoes_tot[i,j]*cosd(realizacoes_tot[pα,j])
+                    fy = realizacoes[i,j]*sind(realizacoes[pα,j])
+                    fx = realizacoes[i,j]*cosd(realizacoes[pα,j])
                 else
                     error("aplica_loads!:: implementar para z")
             end
@@ -202,13 +161,14 @@ function distribui_tensoes(malha, realizacoes_tot)
             contador += 1
             forcas2[contador,:] = [no 1 fx]
             contador += 1
-            forcas2[contador,:] = [no 2 fy]
-            #= Aplica a realização j das forças
-            for i in size(malha.loads,1) 
-                valor_forca = realizacoes_tot[i, j]
-                malha.loads[i,3] = valor_forca
-            end
-            =#
+            forcas2[contador,:] = [no 2 fy] 
+            # Aplica a realização j das forças
+            ##########################
+        
+            #valor_forca = realizacoes[i, j]
+            #malha_local.loads[i,3] = valor_forca
+        
+            
         end
 
         # cria uma cópia da malha com as novas forças (eu não consegui fazer a alteração direto em malha.loads)
@@ -232,9 +192,13 @@ function distribui_tensoes(malha, realizacoes_tot)
         U,_ = Analise3D(malha_local,false)
 
         ρ = ones(malha_local.ne)
+        #U,_ = Analise3D(malha,false)
+
+        ρ = ones(malha.ne)
 
         # Calcula as tensões equivalentes pra essa realização
-        σ_eq = tensao_equivalente(U, malha_local, ρ)
+        σ_eq = tensao_equivalenteval(U, malha_local) # chama as rotinas pra tensao sem relaxação
+        #σ_eq = tensao_equivalenteval(U, malha) # chama as rotinas pra tensao sem relaxação
 
         # Salva o resultado da tensão dessa realização na matriz
         tensoes[:, j] .= σ_eq
@@ -245,8 +209,18 @@ function distribui_tensoes(malha, realizacoes_tot)
 end
 
 
-#### FUNÇÕES EM DESUSO
 
+
+
+
+
+
+
+
+
+
+#### FUNÇÕES EM DESUSO ####
+#=
 function roda_lass(malha,n_r,ρ) # DESUSO
 
     # Define distribuições das forças 
@@ -293,5 +267,73 @@ function extrai_loads(malha) # DESUSO
     return locais 
 
 end
+
+
+
+function Realiza_norma(x::AbstractVector, malha::LFrame.Malha, forcas::AbstractMatrix, ρ::AbstractVector)
+
+    # Cálculo da norma das tensões considerando a variável aleatória, o resultado disso vai ser o argumento (de tensão)
+    # que vai pro LASS
+    σ = Calcula_norma(x,malha,forcas, ρ)
+
+    # Devolve
+    return σ
+    
+end
+
+function Calcula_norma(x::AbstractVector,  malha::LFrame.Malha, forcas::AbstractMatrix, ρ::AbstractVector, P=8.0)
+
+    # Aplica as forças
+    aplica_loads!(forcas, x)
+
+    # Número de nós 
+    nnos = malha.nnos
+
+    # Monta o vetor de forças - Eq. 5
+    F = Monta_FG(forcas,nnos)
+
+    # Soluciona o problema de equilíbrio - Eq. 5
+    U = Monta_linsolve(ρ,malha,F)
+    
+    # Evita zeros em U
+    U .+= 1E-12
+    
+    # Calcula tensoes equivalentes - Eq. 33
+    σe = tensao_equivalenteval(U, malha) 
+
+    # Calcula norma P - uso de acordo com a Eq. 78 na abordagem usada
+    norma = norm(σe,P)
+
+    # retorna o valor da restrição 
+    return norma
+   
+
+end
+
+
+#
+# Gera todas as realizações de forças para usar no LASS
+#
+function gera_distribuicoesforcas1(malha, n_r=100; σ2=0.4)
+
+    # Número de forças 
+    nload = size(malha.loads,1)
+
+    # Matriz n_load × n_r com as realizações 
+    realiza = zeros(nload,n_r)
+    
+    # Loop pelas magnitudes da malha
+    for i = 1:nload
+        magn  = malha.loads[i,3]
+        media = magn               # média é a magnitude que tá na malha
+        desvio = sqrt(abs(σ2*media))         # como definir e onde?     
+        realiza[i,:] .= rand(Normal(media, desvio),n_r) 
+    end
+
+    # Retorna a matriz com todas as realizações
+    return realiza
+
+end
+=#
 
 

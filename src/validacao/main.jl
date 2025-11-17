@@ -15,25 +15,17 @@ function main(arquivo,n_r=200)
     ρ = ones(malha.ne)
 
     # Monta a matriz de rigidez global
-    KG = LFrame.Monta_Kg(malha,ρ)
+    #KG = LFrame.Monta_Kg(malha,ρ)
 
     # Número de nós 
     nnos = malha.nnos
     forcas = malha.loads
 
     # Monta o vetor de forças - Eq. 5
-    F = Monta_FG(forcas,nnos)
+    #F = Monta_FG(forcas,nnos)
     
     # Modifica o sistema para considerar as restrições de apoios 
-    KA, FA = LFrame.Aumenta_sistema(malha, KG, F)
-
-    #=# Cria um problema linear para ser solucionado pelo LinearSolve
-    prob = LinearSolve.LinearProblem(KA,FA)
-    linsolve = LinearSolve.init(prob,KLUFactorization())
-
-    # Calcula o deslocamento e retorna
-    sol = LinearSolve.solve!(linsolve)
-    U = sol.u[1:6*malha.nnos] =#
+    #KA, FA = LFrame.Aumenta_sistema(malha, KG, F)
 
     # Soluciona o problema utilizando o LFrame
     U, malha = Analise3D(arquivo)
@@ -81,7 +73,7 @@ function main(arquivo,n_r=200)
     forcas0 = forcas[:,3]
 
     # Define o desvio padrão do angulo
-    σ3 = 30
+    σ3 = 15.0
     
     # Gera as realizações de α
     realizacoes_alpha = gera_distribuicoesalpha(forcas, n_r, σ3)
@@ -90,7 +82,7 @@ function main(arquivo,n_r=200)
     writedlm("realizacoes_alpha.txt", realizacoes_alpha)
 
     # Define o desvio padrão da força
-    σ2=0.9
+    σ2=0.2
 
     # Vamos gerar as realizações para utilizar ao longo da otimização 
     # matriz com nforcas × nr
@@ -137,17 +129,72 @@ function main(arquivo,n_r=200)
 
 
     # Ve o que acontece com as tensoes
+    #tensoes = distribui_tensoes(malha, realizacoes_tot)
     tensoes = distribui_tensoes(malha, realizacoes_tot)
 
-    p2 = plot(title = "Distribuição das Tensões", xlabel = "Tensão [MPa]", ylabel = "Frequência")
+    for ele = 1:nele
+        
+        # índices desse elemento
+        inicio = (ele-1)*4 + 1
+        fim    = inicio + 3
+        idxs = inicio:fim
 
-   for i = 1:nele
-        histogram!(p2, tensoes[i,:], label = "Elemento $i")
+        # legenda
+        nomes = ["(no1, pt0)", "(no1, pt1)", "(no2, pt0)", "(no2, pt1)"]
+
+        # cria o plot
+        p = plot(
+            title = "Distribuição das tensões, Elemento $ele",
+            xlabel = "Tensão [MPa]",
+            ylabel = "Frequência",
+            legend = :topright
+        )
+
+        # plota com transparência
+        for (k, idx) in enumerate(idxs)
+            histogram!(
+                p,
+                tensoes[idx, :],
+                label = nomes[k],
+                alpha = 0.4,      
+            )
+        end
+
+        # salva 
+        savefig(p, "figuras/hist_tensao_elemento_$ele.pdf")
+
+        # tambem mostra na tela
+        display(p)
     end
 
-    display(p2)
+    # MEDIAS E DESVIOS PADRAO 
+    for ele = 1:nele
+        inicio = (ele-1)*4 + 1
+        fim    = inicio + 3
+        idxs = inicio:fim
 
-    savefig("figuras/histograma_tensao.pdf")
+        println("\nElemento $ele:")
+        for idx in idxs
+            println("  Ponto $(idx-inicio+1): média = $(mean(tensoes[idx,:])) MPa,  desvio = $(std(tensoes[idx,:])) MPa")
+        end
+    end
+
+    # desvios força
+    for i in 1:nload
+        f_med  = mean(realizacoes[i,:])
+        f_std  = std(realizacoes[i,:])
+
+        println("Força $i: média = $(f_med) N,  desvio = $(f_std) N")
+    end
+
+    # desvios angulo
+    for i in 1:nload
+        alpha_med  = mean(realizacoes_alpha[i,:])
+        alpha_std  = std(realizacoes_alpha[i,:])
+
+        println("Ângulo da força $i: média = $(alpha_med) N,  desvio = $(alpha_std) N")
+    end
+
     
     return vetor_tensoes, vetor_tensoes_equivalentes
   

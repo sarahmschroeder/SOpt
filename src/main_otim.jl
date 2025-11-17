@@ -34,10 +34,10 @@ function main_otim(arquivo,nr=10)
     forcas0 = forcas[:,3]
 
     # Define o desvio padrão da força
-    σ2=0.9
+    σ2=0.2
 
     # Define o desvio padrão do angulo
-    σ3 = deg2rad(30)
+    σ3 = 15
     
     # Gera as realizações de α
     realizacoes_alpha = gera_distribuicoesalpha(forcas, nr, σ3)
@@ -82,7 +82,7 @@ function main_otim(arquivo,nr=10)
     μ = zeros(m)
 
     # Número de desvios para a restrição robusta 
-    β = 0.0
+    β = 3.0
 
     # Dicionarios LFrame
     dados_ele = malha.dados_elementos

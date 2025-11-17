@@ -41,7 +41,7 @@ function Driver(ρ::AbstractVector, bins, r0::Float64, malha::LFrame.Malha, μ::
     # Com isso, a restrição robusta é 
     gr = Egσ + β*Vargσ
 
-    @show Egσ, Vargσ, gr
+    #@show Egσ, Vargσ, gr
 
     # Se solicitado, devolve a restrição 
     if opcao == "gσ"

@@ -171,7 +171,7 @@ function Tensao_eq_elemento_no_ponto(ele,no,pto,malha,U::AbstractVector, ρ::Abs
 
     # Aplica relaxação - Seção 4.2
     p = 3.0
-    q = 2.5 
+    q = 2.5
 
     # Acessa o rho do elemento
     ρe = ρ[ele]

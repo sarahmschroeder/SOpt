@@ -14,6 +14,7 @@ module SOpt
     using ForwardDiff
     using WallE
     using Plots
+    using Statistics
 
 
     # Carrega os modulos

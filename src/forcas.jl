@@ -108,7 +108,7 @@ function gera_distribuicoesalpha(forcas, nr, σ3; deterministico=false)
             variancia = sqrt(abs(σ3))
             
             # Gera as realizações segundo uma distribuição normal 
-            realiza_alpha[i,:] .= rand(Normal(media, variancia), nr)
+            realiza_alpha[i,:] .= rand(Normal(media, σ3), nr)
         end
 
 
@@ -194,8 +194,10 @@ function gera_distribuicoesforcas(forcas::AbstractMatrix{T}, forcas0::AbstractVe
             # Variância da distribuição 
             variancia = sqrt(abs(σ2*media))      # robusto padrão
 
+            sigma = abs(σ2*media)
+
             # Gera as realizações segundo uma distribuição normal 
-            realiza[i,:] .= rand(Normal(media, variancia), nr)
+            realiza[i,:] .= rand(Normal(media, sigma), nr)
         end
 
 
